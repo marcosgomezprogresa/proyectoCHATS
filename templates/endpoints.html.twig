@@ -1,0 +1,425 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}API Endpoints Documentation - Chats{% endblock %}
+
+{% block body %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        padding: 20px;
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    
+    .header p {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+    
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 5px;
+        transition: background 0.3s;
+    }
+    
+    .back-link:hover {
+        background: #f0f0f0;
+    }
+    
+    .endpoints-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .endpoint-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s;
+        border-left: 4px solid #667eea;
+    }
+    
+    .endpoint-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .endpoint-number {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 28px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+    
+    .endpoint-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .endpoint-method {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .method-post {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .method-get {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .method-patch {
+        background: #fff3e0;
+        color: #e65100;
+    }
+    
+    .method-delete {
+        background: #ffebee;
+        color: #c62828;
+    }
+    
+    .method-mixed {
+        background: #e8f5e9;
+        color: #388e3c;
+    }
+    
+    .endpoint-access {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 8px;
+        padding: 8px;
+        background: #f9f9f9;
+        border-radius: 4px;
+    }
+    
+    .endpoint-description {
+        font-size: 13px;
+        color: #555;
+        line-height: 1.5;
+    }
+    
+    .full-endpoint-details {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        overflow-y: auto;
+    }
+    
+    .full-endpoint-details.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .details-modal {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 800px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+    
+    .close-modal {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .close-modal:hover {
+        background: #764ba2;
+    }
+    
+    .details-modal h2 {
+        color: #333;
+        margin-bottom: 20px;
+        padding-top: 10px;
+    }
+    
+    .detail-section {
+        margin-bottom: 20px;
+    }
+    
+    .detail-section h3 {
+        font-size: 14px;
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .detail-section p {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+    
+    .code-block {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        overflow-x: auto;
+        color: #333;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .method-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+    
+    .badge-token {
+        background: #c8e6c9;
+        color: #1b5e20;
+    }
+    
+    .badge-public {
+        background: #fff9c4;
+        color: #f57f17;
+    }
+    
+    .search-box {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .search-box input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    
+    .search-box button {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .search-box button:hover {
+        background: #764ba2;
+    }
+    
+    @media (max-width: 768px) {
+        .header h1 {
+            font-size: 24px;
+        }
+        
+        .endpoints-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .details-modal {
+            width: 95%;
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="container">
+    <a href="{{ path('app_login') }}" class="back-link">← Volver al Login</a>
+    
+    <div class="header">
+        <h1>📚 Documentación de API Endpoints</h1>
+        <p>Plataforma de Mensajería en Tiempo Real - Chats</p>
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar endpoint..." />
+        <button onclick="filterEndpoints()">Buscar</button>
+    </div>
+    
+    <div class="endpoints-grid" id="endpointsContainer">
+        {% for endpoint in endpoints %}
+        <div class="endpoint-card" onclick="showDetails({{ endpoint.id }})">
+            <div class="endpoint-number">{{ endpoint.id }}</div>
+            <div class="endpoint-name">{{ endpoint.nombre }}</div>
+            <span class="endpoint-method method-{% if '/' in endpoint.metodo %}mixed{% else %}{{ endpoint.metodo|lower }}{% endif %}">
+                {{ endpoint.metodo }}
+            </span>
+            <div class="endpoint-access">
+                <strong>Acceso:</strong> 
+                {% if 'Token' in endpoint.acceso %}
+                    <span class="badge-token">🔒 {{ endpoint.acceso }}</span>
+                {% else %}
+                    <span class="badge-public">🌐 {{ endpoint.acceso }}</span>
+                {% endif %}
+            </div>
+            <div class="endpoint-description">{{ endpoint.descripcion }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal para detalles completos -->
+{% for endpoint in endpoints %}
+<div class="full-endpoint-details" id="modal{{ endpoint.id }}">
+    <div class="details-modal">
+        <button class="close-modal" onclick="closeModal({{ endpoint.id }})">&times;</button>
+        
+        <h2>{{ endpoint.nombre }}</h2>
+        
+        <div class="detail-section">
+            <h3>Información General</h3>
+            <p>
+                <strong>Método HTTP:</strong> 
+                <span class="method-badge method-{% if '/' in endpoint.metodo %}mixed{% else %}{{ endpoint.metodo|lower }}{% endif %}">
+                    {{ endpoint.metodo }}
+                </span>
+            </p>
+            <p>
+                <strong>Acceso:</strong>
+                {% if 'Token' in endpoint.acceso %}
+                    <span class="badge-token">🔒 {{ endpoint.acceso }}</span>
+                {% else %}
+                    <span class="badge-public">🌐 {{ endpoint.acceso }}</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Descripción</h3>
+            <p>{{ endpoint.descripcion }}</p>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Ejemplo de Solicitud (Request)</h3>
+            <div class="code-block">{{ endpoint.request }}</div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Ejemplo de Respuesta Exitosa</h3>
+            <div class="code-block">{{ endpoint.response }}</div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Autenticación Requerida</h3>
+            <p>
+                <strong>Headers recomendados:</strong>
+            </p>
+            <div class="code-block">X-API-Key: APP123456789
+Authorization: Bearer &lt;token_jwt&gt;
+Content-Type: application/json</div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    function showDetails(endpointId) {
+        document.getElementById('modal' + endpointId).classList.add('active');
+    }
+    
+    function closeModal(endpointId) {
+        document.getElementById('modal' + endpointId).classList.remove('active');
+    }
+    
+    function filterEndpoints() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.endpoint-card');
+        
+        cards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    document.getElementById('searchInput').addEventListener('keyup', filterEndpoints);
+    
+    // Cerrar modal al hacer click fuera
+    document.querySelectorAll('.full-endpoint-details').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

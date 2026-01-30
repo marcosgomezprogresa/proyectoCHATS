@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home - Chats{% endblock %}
+
+{% block body %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .home-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 50px;
+        max-width: 500px;
+        text-align: center;
+    }
+    
+    .home-container h1 {
+        font-size: 32px;
+        color: #333;
+        margin-bottom: 20px;
+    }
+    
+    .home-container p {
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .button-group {
+        display: flex;
+        gap: 15px;
+        flex-direction: column;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+        border: 2px solid #667eea;
+    }
+    
+    .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+    }
+</style>
+
+<div class="home-container">
+    <h1>🏠 Bienvenido a Chats</h1>
+    <p>
+        Plataforma de mensajería en tiempo real que conecta a personas dentro de un radio geográfico cercano (~5 km).
+    </p>
+    
+    <div class="button-group">
+        <a href="{{ path('app_endpoints') }}" class="btn btn-primary">📚 Ver Endpoints</a>
+        <a href="{{ path('app_login') }}" class="btn btn-secondary">🔐 Volver al Login</a>
+    </div>
+</div>
+{% endblock %}

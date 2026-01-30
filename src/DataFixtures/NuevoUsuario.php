@@ -17,6 +17,7 @@ class NuevoUsuario extends Fixture
     {
         $user = new User();
         $user->setEmail('user@user.com');
+        $user->setNombre('Usuario Prueba');
         $user->setRoles(['ROLE_USER']); // rol básico
         $user->setToken(bin2hex(random_bytes(32)));
 
