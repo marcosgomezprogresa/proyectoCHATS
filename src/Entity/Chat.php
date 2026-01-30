@@ -3,12 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\ChatRepository;
-<<<<<<< HEAD
+use App\Enum\TipoChat;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-=======
-use App\Enum\TipoChat;
->>>>>>> bb7add262ebfe8f00e8f30ba2f5840146a96bb53
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ChatRepository::class)]
@@ -160,7 +157,7 @@ class Chat
     public function verificarYBorrarSiVacio(): bool
     {
         // El chat general NUNCA se borra
-        if ($this->tipo === 'general' && $this->nombre === 'Chat General') {
+        if ($this->esChatGeneral()) {
             return false;
         }
         
