@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Enum\EstadoUsuario;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -39,8 +40,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $avatarUrl = null;
 
-    #[ORM\Column(length: 20)]
-    private string $estado = 'offline'; // online, ausente, offline
+    #[ORM\Column(type: 'string', enumType: EstadoUsuario::class)]
+    private EstadoUsuario $estado = EstadoUsuario::OFFLINE;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $latitud = null;
@@ -64,6 +65,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $bloqueos;
 
     /**
+     * @var Collection<int, UsuarioChat>
+     */
+    #[ORM\OneToMany(targetEntity: UsuarioChat::class, mappedBy: 'usuario')]
+    private Collection $usuariosChat;
+
+    /**
      * @var Collection<int, Mensaje>
      */
     #[ORM\OneToMany(targetEntity: Mensaje::class, mappedBy: 'remitente')]
@@ -82,6 +89,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->fechaRegistro = new \DateTime();
         $this->ultimaActividad = new \DateTime();
         $this->bloqueos = new ArrayCollection();
+        $this->usuariosChat = new ArrayCollection();
         $this->mensajes = new ArrayCollection();
         $this->invitacions = new ArrayCollection();
     }
@@ -110,12 +118,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getEstado(): string
+    public function getEstado(): EstadoUsuario
     {
         return $this->estado;
     }
 
-    public function setEstado(string $estado): static
+    public function setEstado(EstadoUsuario $estado): static
     {
         $this->estado = $estado;
         return $this;
@@ -295,6 +303,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($bloqueo->getBloqueador() === $this) {
                 $bloqueo->setBloqueador(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UsuarioChat>
+     */
+    public function getUsuariosChat(): Collection
+    {
+        return $this->usuariosChat;
+    }
+
+    public function addUsuarioChat(UsuarioChat $usuarioChat): static
+    {
+        if (!$this->usuariosChat->contains($usuarioChat)) {
+            $this->usuariosChat->add($usuarioChat);
+            $usuarioChat->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuarioChat(UsuarioChat $usuarioChat): static
+    {
+        if ($this->usuariosChat->removeElement($usuarioChat)) {
+            // set the owning side to null (unless already changed)
+            if ($usuarioChat->getUsuario() === $this) {
+                $usuarioChat->setUsuario(null);
             }
         }
 

@@ -35,6 +35,12 @@ class Chat
     private ?float $radioKm = null;
 
     /**
+     * @var Collection<int, UsuarioChat>
+     */
+    #[ORM\OneToMany(targetEntity: UsuarioChat::class, mappedBy: 'chat')]
+    private Collection $usuariosChat;
+
+    /**
      * @var Collection<int, Mensaje>
      */
     #[ORM\OneToMany(targetEntity: Mensaje::class, mappedBy: 'chat')]
@@ -48,6 +54,7 @@ class Chat
 
     public function __construct()
     {
+        $this->usuariosChat = new ArrayCollection();
         $this->mensajes = new ArrayCollection();
         $this->invitacions = new ArrayCollection();
     }
@@ -187,6 +194,36 @@ class Chat
         // TODO: Implementar lógica de distancia
         // return $this->calcularDistancia($usuario) <= $this->radioKm;
         return true;
+    }
+
+    /**
+     * @return Collection<int, UsuarioChat>
+     */
+    public function getUsuariosChat(): Collection
+    {
+        return $this->usuariosChat;
+    }
+
+    public function addUsuarioChat(UsuarioChat $usuarioChat): static
+    {
+        if (!$this->usuariosChat->contains($usuarioChat)) {
+            $this->usuariosChat->add($usuarioChat);
+            $usuarioChat->setChat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuarioChat(UsuarioChat $usuarioChat): static
+    {
+        if ($this->usuariosChat->removeElement($usuarioChat)) {
+            // set the owning side to null (unless already changed)
+            if ($usuarioChat->getChat() === $this) {
+                $usuarioChat->setChat(null);
+            }
+        }
+
+        return $this;
     }
 
     /**

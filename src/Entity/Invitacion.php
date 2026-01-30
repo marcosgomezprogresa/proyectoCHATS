@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\InvitacionRepository;
+use App\Enum\EstadoInvitacion;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: InvitacionRepository::class)]
@@ -13,8 +14,8 @@ class Invitacion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $estado = null;
+    #[ORM\Column(type: 'string', enumType: EstadoInvitacion::class)]
+    private ?EstadoInvitacion $estado = null;
 
     #[ORM\Column]
     private ?\DateTime $fechaEnvio = null;
@@ -39,12 +40,12 @@ class Invitacion
         return $this->id;
     }
 
-    public function getEstado(): ?string
+    public function getEstado(): ?EstadoInvitacion
     {
         return $this->estado;
     }
 
-    public function setEstado(string $estado): static
+    public function setEstado(EstadoInvitacion $estado): static
     {
         $this->estado = $estado;
 

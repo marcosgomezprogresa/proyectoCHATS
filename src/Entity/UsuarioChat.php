@@ -13,6 +13,14 @@ class UsuarioChat
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(inversedBy: 'usuariosChat')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $usuario = null;
+
+    #[ORM\ManyToOne(inversedBy: 'usuariosChat')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Chat $chat = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $fechaUnion = null;
 
@@ -218,5 +226,31 @@ class UsuarioChat
     {
         $this->notificaciones = false;
         $this->silenciado = true;
+    }
+
+    // ============ RELACIONES NUEVAS ============
+
+    public function getUsuario(): ?User
+    {
+        return $this->usuario;
+    }
+
+    public function setUsuario(?User $usuario): static
+    {
+        $this->usuario = $usuario;
+
+        return $this;
+    }
+
+    public function getChat(): ?Chat
+    {
+        return $this->chat;
+    }
+
+    public function setChat(?Chat $chat): static
+    {
+        $this->chat = $chat;
+
+        return $this;
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MensajeRepository;
+use App\Enum\TipoMensaje;
+use App\Enum\EstadoMensaje;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MensajeRepository::class)]
@@ -16,11 +18,11 @@ class Mensaje
     #[ORM\Column(length: 255)]
     private ?string $contenido = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $tipo = null;
+    #[ORM\Column(type: 'string', enumType: TipoMensaje::class)]
+    private ?TipoMensaje $tipo = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $estado = null;
+    #[ORM\Column(type: 'string', enumType: EstadoMensaje::class)]
+    private ?EstadoMensaje $estado = null;
 
     #[ORM\Column]
     private ?\DateTime $fechaHora = null;
@@ -48,24 +50,24 @@ class Mensaje
         return $this;
     }
 
-    public function getTipo(): ?string
+    public function getTipo(): ?TipoMensaje
     {
         return $this->tipo;
     }
 
-    public function setTipo(string $tipo): static
+    public function setTipo(TipoMensaje $tipo): static
     {
         $this->tipo = $tipo;
 
         return $this;
     }
 
-    public function getEstado(): ?string
+    public function getEstado(): ?EstadoMensaje
     {
         return $this->estado;
     }
 
-    public function setEstado(string $estado): static
+    public function setEstado(EstadoMensaje $estado): static
     {
         $this->estado = $estado;
 
