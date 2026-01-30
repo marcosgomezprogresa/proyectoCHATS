@@ -3,8 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\ChatRepository;
+<<<<<<< HEAD
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+=======
+use App\Enum\TipoChat;
+>>>>>>> bb7add262ebfe8f00e8f30ba2f5840146a96bb53
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ChatRepository::class)]
@@ -18,8 +22,8 @@ class Chat
     #[ORM\Column(length: 100)]
     private ?string $nombre = null;
 
-    #[ORM\Column(length: 20)]
-    private ?string $tipo = null;
+    #[ORM\Column(type: 'string', enumType: TipoChat::class)]
+    private ?TipoChat $tipo = null;
 
     #[ORM\Column(length: 255)]
     private ?string $descripcion = null;
@@ -68,12 +72,12 @@ class Chat
         return $this;
     }
 
-    public function getTipo(): ?string
+    public function getTipo(): ?TipoChat
     {
         return $this->tipo;
     }
 
-    public function setTipo(string $tipo): static
+    public function setTipo(TipoChat $tipo): static
     {
         $this->tipo = $tipo;
 
@@ -174,7 +178,7 @@ class Chat
      */
     public function esChatGeneral(): bool
     {
-        return $this->tipo === 'general' && $this->nombre === 'Chat General';
+        return $this->tipo === TipoChat::GENERAL && $this->nombre === 'Chat General';
     }
 
     /**
