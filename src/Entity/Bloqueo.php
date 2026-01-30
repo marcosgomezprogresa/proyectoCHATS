@@ -22,6 +22,10 @@ class Bloqueo
     #[ORM\Column]
     private ?bool $activo = null;
 
+    #[ORM\ManyToOne(inversedBy: 'bloqueos')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $bloqueador = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -59,6 +63,18 @@ class Bloqueo
     public function setActivo(bool $activo): static
     {
         $this->activo = $activo;
+
+        return $this;
+    }
+
+    public function getBloqueador(): ?User
+    {
+        return $this->bloqueador;
+    }
+
+    public function setBloqueador(?User $bloqueador): static
+    {
+        $this->bloqueador = $bloqueador;
 
         return $this;
     }

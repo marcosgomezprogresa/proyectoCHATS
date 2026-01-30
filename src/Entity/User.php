@@ -57,12 +57,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $ultimaActividad = null;
 
+    /**
+     * @var Collection<int, Bloqueo>
+     */
+    #[ORM\OneToMany(targetEntity: Bloqueo::class, mappedBy: 'bloqueador')]
+    private Collection $bloqueos;
+
+    /**
+     * @var Collection<int, Mensaje>
+     */
+    #[ORM\OneToMany(targetEntity: Mensaje::class, mappedBy: 'remitente')]
+    private Collection $mensajes;
+
+    /**
+     * @var Collection<int, Invitacion>
+     */
+    #[ORM\OneToMany(targetEntity: Invitacion::class, mappedBy: 'invitador')]
+    private Collection $invitacions;
+
     // ============ CONSTRUCTOR ============
     
     public function __construct()
     {
         $this->fechaRegistro = new \DateTime();
         $this->ultimaActividad = new \DateTime();
+        $this->bloqueos = new ArrayCollection();
+        $this->mensajes = new ArrayCollection();
+        $this->invitacions = new ArrayCollection();
     }
 
     // ============ GETTERS Y SETTERS NUEVOS ============
@@ -248,5 +269,95 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[\Deprecated]
     public function eraseCredentials(): void
     {
+    }
+
+    /**
+     * @return Collection<int, Bloqueo>
+     */
+    public function getBloqueos(): Collection
+    {
+        return $this->bloqueos;
+    }
+
+    public function addBloqueo(Bloqueo $bloqueo): static
+    {
+        if (!$this->bloqueos->contains($bloqueo)) {
+            $this->bloqueos->add($bloqueo);
+            $bloqueo->setBloqueador($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBloqueo(Bloqueo $bloqueo): static
+    {
+        if ($this->bloqueos->removeElement($bloqueo)) {
+            // set the owning side to null (unless already changed)
+            if ($bloqueo->getBloqueador() === $this) {
+                $bloqueo->setBloqueador(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Mensaje>
+     */
+    public function getMensajes(): Collection
+    {
+        return $this->mensajes;
+    }
+
+    public function addMensaje(Mensaje $mensaje): static
+    {
+        if (!$this->mensajes->contains($mensaje)) {
+            $this->mensajes->add($mensaje);
+            $mensaje->setRemitente($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMensaje(Mensaje $mensaje): static
+    {
+        if ($this->mensajes->removeElement($mensaje)) {
+            // set the owning side to null (unless already changed)
+            if ($mensaje->getRemitente() === $this) {
+                $mensaje->setRemitente(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitacion>
+     */
+    public function getInvitacions(): Collection
+    {
+        return $this->invitacions;
+    }
+
+    public function addInvitacion(Invitacion $invitacion): static
+    {
+        if (!$this->invitacions->contains($invitacion)) {
+            $this->invitacions->add($invitacion);
+            $invitacion->setInvitador($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitacion(Invitacion $invitacion): static
+    {
+        if ($this->invitacions->removeElement($invitacion)) {
+            // set the owning side to null (unless already changed)
+            if ($invitacion->getInvitador() === $this) {
+                $invitacion->setInvitador(null);
+            }
+        }
+
+        return $this;
     }
 }

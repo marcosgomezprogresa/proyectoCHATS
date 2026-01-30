@@ -25,6 +25,12 @@ class Mensaje
     #[ORM\Column]
     private ?\DateTime $fechaHora = null;
 
+    #[ORM\ManyToOne(inversedBy: 'mensajes')]
+    private ?Chat $chat = null;
+
+    #[ORM\ManyToOne(inversedBy: 'mensajes')]
+    private ?User $remitente = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +80,30 @@ class Mensaje
     public function setFechaHora(\DateTime $fechaHora): static
     {
         $this->fechaHora = $fechaHora;
+
+        return $this;
+    }
+
+    public function getChat(): ?Chat
+    {
+        return $this->chat;
+    }
+
+    public function setChat(?Chat $chat): static
+    {
+        $this->chat = $chat;
+
+        return $this;
+    }
+
+    public function getRemitente(): ?User
+    {
+        return $this->remitente;
+    }
+
+    public function setRemitente(?User $remitente): static
+    {
+        $this->remitente = $remitente;
 
         return $this;
     }

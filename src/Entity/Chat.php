@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ChatRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ChatRepository::class)]
@@ -30,6 +32,24 @@ class Chat
 
     #[ORM\Column]
     private ?float $radioKm = null;
+
+    /**
+     * @var Collection<int, Mensaje>
+     */
+    #[ORM\OneToMany(targetEntity: Mensaje::class, mappedBy: 'chat')]
+    private Collection $mensajes;
+
+    /**
+     * @var Collection<int, Invitacion>
+     */
+    #[ORM\OneToMany(targetEntity: Invitacion::class, mappedBy: 'chat')]
+    private Collection $invitacions;
+
+    public function __construct()
+    {
+        $this->mensajes = new ArrayCollection();
+        $this->invitacions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -166,5 +186,65 @@ class Chat
         // TODO: Implementar lógica de distancia
         // return $this->calcularDistancia($usuario) <= $this->radioKm;
         return true;
+    }
+
+    /**
+     * @return Collection<int, Mensaje>
+     */
+    public function getMensajes(): Collection
+    {
+        return $this->mensajes;
+    }
+
+    public function addMensaje(Mensaje $mensaje): static
+    {
+        if (!$this->mensajes->contains($mensaje)) {
+            $this->mensajes->add($mensaje);
+            $mensaje->setChat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMensaje(Mensaje $mensaje): static
+    {
+        if ($this->mensajes->removeElement($mensaje)) {
+            // set the owning side to null (unless already changed)
+            if ($mensaje->getChat() === $this) {
+                $mensaje->setChat(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitacion>
+     */
+    public function getInvitacions(): Collection
+    {
+        return $this->invitacions;
+    }
+
+    public function addInvitacion(Invitacion $invitacion): static
+    {
+        if (!$this->invitacions->contains($invitacion)) {
+            $this->invitacions->add($invitacion);
+            $invitacion->setChat($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitacion(Invitacion $invitacion): static
+    {
+        if ($this->invitacions->removeElement($invitacion)) {
+            // set the owning side to null (unless already changed)
+            if ($invitacion->getChat() === $this) {
+                $invitacion->setChat(null);
+            }
+        }
+
+        return $this;
     }
 }

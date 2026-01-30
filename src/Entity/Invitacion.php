@@ -25,6 +25,15 @@ class Invitacion
     #[ORM\Column(length: 255)]
     private ?string $mensaje = null;
 
+    #[ORM\ManyToOne(inversedBy: 'invitacions')]
+    private ?Chat $chat = null;
+
+    #[ORM\ManyToOne(inversedBy: 'invitacions')]
+    private ?User $invitador = null;
+
+    #[ORM\ManyToOne(inversedBy: 'invitacions')]
+    private ?User $invitado = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +83,42 @@ class Invitacion
     public function setMensaje(string $mensaje): static
     {
         $this->mensaje = $mensaje;
+
+        return $this;
+    }
+
+    public function getChat(): ?Chat
+    {
+        return $this->chat;
+    }
+
+    public function setChat(?Chat $chat): static
+    {
+        $this->chat = $chat;
+
+        return $this;
+    }
+
+    public function getInvitador(): ?User
+    {
+        return $this->invitador;
+    }
+
+    public function setInvitador(?User $invitador): static
+    {
+        $this->invitador = $invitador;
+
+        return $this;
+    }
+
+    public function getInvitado(): ?User
+    {
+        return $this->invitado;
+    }
+
+    public function setInvitado(?User $invitado): static
+    {
+        $this->invitado = $invitado;
 
         return $this;
     }
