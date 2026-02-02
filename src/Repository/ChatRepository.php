@@ -17,32 +17,6 @@ class ChatRepository extends ServiceEntityRepository
     }
 
     /**
-     * Obtiene todos los chats de un usuario
-     */
-    public function findChatsByUser($user): array
-    {
-        return $this->createQueryBuilder('c')
-            ->innerJoin('c.usuariosChat', 'uc')
-            ->where('uc.usuario = :user')
-            ->setParameter('user', $user)
-            ->orderBy('c.fechaCreacion', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Chat
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
-
-    /**
      * Busca chats que contienen al usuario especificado (únicamente chats donde el usuario participa)
      *
      * @param mixed $user User entity or user id

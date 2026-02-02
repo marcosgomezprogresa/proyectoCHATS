@@ -205,6 +205,8 @@ class AdminApiController extends AbstractController
             $bloqueo->setBloqueador($user);
             $bloqueo->setBloqueado($userABloquear);
             $bloqueo->setFechaBloqueo(new \DateTime());
+            $bloqueo->setMotivo($data['motivo'] ?? 'Sin especificar');
+            $bloqueo->setActivo(true);
 
             $em->persist($bloqueo);
             $em->flush();
