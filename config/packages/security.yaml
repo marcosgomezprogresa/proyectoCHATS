@@ -30,8 +30,10 @@ security:
                 path: app_logout
 
     access_control:
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api, roles: PUBLIC_ACCESS }
         - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/register$, roles: PUBLIC_ACCESS }
         - { path: ^/endpoints, roles: PUBLIC_ACCESS }
         - { path: ^/home$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

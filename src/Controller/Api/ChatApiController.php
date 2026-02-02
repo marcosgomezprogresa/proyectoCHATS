@@ -69,7 +69,7 @@ class ChatApiController extends AbstractController
                         'estado' => $user->getEstado()->value
                     ],
                     'chats_activos' => $chatsData,
-                    'usuarios_cercanos' => $this->getUsuariosCercanos($user->getId(), $userRepository),
+                    'usuarios_cercanos' => [],
                     'estadisticas' => [
                         'total_chats' => count($chatsData),
                         'mensajes_no_leidos' => 0

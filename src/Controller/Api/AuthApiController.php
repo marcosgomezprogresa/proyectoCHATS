@@ -85,8 +85,8 @@ class AuthApiController extends AbstractController
                 ], 401);
             }
 
-            // Login exitoso - devolver token, perfil y URL de redirección
-            $responseData = [
+            // Login exitoso - devolver token y perfil
+            return $this->json([
                 'success' => true,
                 'message' => 'Login exitoso',
                 'data' => [
@@ -95,18 +95,9 @@ class AuthApiController extends AbstractController
                         'email' => $user->getEmail(),
                         'nombre' => $user->getNombre(),
                         'estado' => $user->getEstado()->value
-                    ],
-                    'redirect_url' => $this->generateUrl('app_home')
+                    ]
                 ]
-            ];
-
-            // Si el cliente espera HTML (navegador sin JS), redirigimos a la ruta 'home'
-            $accept = $request->headers->get('Accept', '');
-            if (str_contains($accept, 'text/html') && !str_contains($accept, 'application/json')) {
-                return $this->redirectToRoute('app_home');
-            }
-
-            return $this->json($responseData, 200);
+            ], 200);
 
         } catch (\Exception $e) {
             return $this->json([
