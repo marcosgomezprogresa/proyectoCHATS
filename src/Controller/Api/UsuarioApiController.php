@@ -143,9 +143,12 @@ class UsuarioApiController extends AbstractController
             $usuariosChat = $user->getUsuariosChat();
             $chatsActivos = $usuariosChat ? count($usuariosChat) : 0;
             
-            // Mensajes totales
-            $mensajes = $mensajeRepository->findBy(['usuario' => $user]);
-            $mensajesTotales = $mensajes ? count($mensajes) : 0;
+            // Mensajes totales - usando QueryBuilder para COUNT directo
+            $qb = $mensajeRepository->createQueryBuilder('m')
+                ->select('COUNT(m.id)')
+                ->where('m.remitente = :remitente')
+                ->setParameter('remitente', $user);
+            $mensajesTotales = (int)$qb->getQuery()->getSingleScalarResult();
 
             // Devolver perfil con estadísticas
             $profileData = $this->serializeMyProfile($user);
