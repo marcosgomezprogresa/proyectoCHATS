@@ -10,8 +10,18 @@
     .left{flex:1;min-width:320px}
     .right{flex:2}
     .chat-item{border:1px solid #eee;padding:12px;border-radius:6px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    .chat-item.clickable{cursor:pointer}
     .chat-meta{display:flex;flex-direction:column}
-    #map{height:600px;border-radius:8px}
+    .status-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+    .status-dot.online{background:#2ecc71}
+    .status-dot.offline{background:#dcdcdc}
+    #map{height:400px;border-radius:8px}
+    #chatPane{margin-top:12px;background:#fafafa;border-radius:8px;padding:12px;border:1px solid #eee}
+    #messages{height:220px;overflow:auto;border:1px solid #eee;padding:12px;border-radius:6px;background:#fff}
+    .msg{margin-bottom:8px}
+    .msg.me{text-align:right}
+    .msg .b{font-weight:700}
+    .msg .t{display:block;font-size:12px;color:#666}
     .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
     .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none}
     .muted{color:#666;font-size:13px}
@@ -22,12 +32,25 @@
         <div class="header">
             <div>
                 <h2>Chats activos</h2>
-                <div class="muted">Lista de chats actualmente activos</div>
+                <div class="muted">Chats privados y grupos</div>
             </div>
             <a id="refreshBtn" class="btn-primary">🔄 Refrescar</a>
         </div>
-        <div id="chatList">
-            <!-- Se rellenará con JS -->
+
+        <div id="privateSection">
+            <h3>Chats privados</h3>
+            <div class="muted">Haz clic en un usuario online para iniciar un chat privado</div>
+            <div id="privateUsers" style="margin-top:10px"></div>
+            <div style="margin-top:8px;font-size:13px;color:#666">Chats privados existentes</div>
+            <div id="privateChatsList" style="margin-top:8px"></div>
+        </div>
+
+        <hr />
+
+        <div id="groupSection">
+            <h3>Grupos</h3>
+            <div class="muted">Grupos disponibles</div>
+            <div id="groupList" style="margin-top:10px"></div>
         </div>
     </div>
 
@@ -38,11 +61,18 @@
                 <div class="muted">Ubicación aproximada de cada chat</div>
             </div>
         </div>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-              integrity="sha256-sA+e2d3gFvQJz1YI4W+EJ8Oe6sQY+4T9FglT8f+AAro=" crossorigin="" />
-        <div id="map"></div>
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                integrity="sha256-o9N1jGk7tE2CzS4k0VZ0GJpVYj5rS1Qv7qz1k0Xv1w0=" crossorigin=""></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <div id="map"></div>        <div id="chatPane" style="display:none">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <strong id="chatWith">Chat</strong>
+                <button id="closeChat" class="btn-primary" style="background:#aaa">Cerrar</button>
+            </div>
+            <div id="messages"></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="messageInput" type="text" placeholder="Escribir mensaje..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ddd" />
+                <button id="sendBtn" class="btn-primary">Enviar</button>
+            </div>
+        </div>        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>"
     </div>
 </div>
 
@@ -54,7 +84,7 @@
         return t.startsWith('usr_tok_') ? t.replace('usr_tok_','') : t;
     }
 
-    async function fetchChats(){
+    async function fetchUsers(){
         const token = getRawToken();
         if(!token){ window.location.href = '{{ url('app_login') }}'; return; }
 
@@ -65,12 +95,31 @@
 
             if(res.status === 401){ window.location.href = '{{ url('app_login') }}'; return; }
 
-            const json = await res.json();
+            const contentType = res.headers.get('content-type') || '';
+            if (!res.ok) {
+                const text = await res.text();
+                console.error('API error', res.status, text);
+                document.getElementById('chatList').innerHTML = '<div class="muted">Error del servidor: ' + res.status + '</div>';
+                return;
+            }
+
+            let json;
+            if (contentType.includes('application/json')) {
+                json = await res.json();
+            } else {
+                const text = await res.text();
+                console.error('Respuesta no JSON de la API:', text);
+                document.getElementById('chatList').innerHTML = '<div class="muted">Respuesta inesperada del servidor</div>';
+                return;
+            }
+
             if(!json.success){ document.getElementById('chatList').innerHTML = '<div class="muted">'+(json.message||'Error')+'</div>'; return; }
 
+            const users = json.data.usuarios_cercanos || [];
             const chats = json.data.chats_activos || [];
-            renderChatList(chats);
-            renderMap(chats);
+            renderUserList(users);
+            renderUserMap(users);
+            renderChats(chats);
 
         }catch(err){
             console.error(err);
@@ -78,27 +127,7 @@
         }
     }
 
-    function renderChatList(chats){
-        const container = document.getElementById('chatList');
-        container.innerHTML = '';
-        if(!chats.length){ container.innerHTML = '<div class="muted">No hay chats activos</div>'; return; }
-
-        chats.forEach(c=>{
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.innerHTML = `
-                <div class="chat-meta">
-                    <strong>${c.nombre}</strong>
-                    <small class="muted">${c.tipo} • ${c.descripcion || ''}</small>
-                </div>
-                <div class="muted">${c.chat_token}</div>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    let map, markersLayer;
-    function renderMap(chats){
+    function renderUserMap(users){
         if(!map){
             map = L.map('map').setView([40.4168, -3.7038], 12);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -110,21 +139,179 @@
 
         markersLayer.clearLayers();
         const bounds = [];
-        chats.forEach(c=>{
-            if(typeof c.lat === 'number' && typeof c.lng === 'number'){
-                const m = L.marker([c.lat, c.lng]).bindPopup(`<strong>${c.nombre}</strong><br>${c.tipo}`);
+        users.forEach(u=>{
+            const lat = Number(u.lat);
+            const lng = Number(u.lng);
+            if(!Number.isNaN(lat) && !Number.isNaN(lng)){
+                const popup = `<strong>${u.nombre}</strong><br>${u.estado}<br>${u.ultima_actividad ? new Date(u.ultima_actividad).toLocaleString() : ''}`;
+                const m = L.marker([lat, lng]).bindPopup(popup);
                 markersLayer.addLayer(m);
-                bounds.push([c.lat, c.lng]);
+                bounds.push([lat, lng]);
             }
         });
 
         if(bounds.length) map.fitBounds(bounds, {padding:[50,50]});
     }
 
-    document.getElementById('refreshBtn').addEventListener('click', fetchChats);
+    function renderChats(chats){
+        const p = document.getElementById('privateChatsList');
+        const g = document.getElementById('groupList');
+        p.innerHTML = '';
+        g.innerHTML = '';
+
+        if(!Array.isArray(chats) || chats.length === 0){
+            g.innerHTML = '<div class="muted">No hay grupos activos</div>';
+        }
+
+        chats.forEach(c=>{
+            if(c.tipo === 'privado'){
+                // Mostrar chat privado en la lista de privados (si existe)
+                const div = document.createElement('div');
+                div.className = 'chat-item clickable';
+                div.innerHTML = `<div class="chat-meta"><strong>${c.nombre}</strong><small class="muted">${c.descripcion || ''}</small></div>`;
+                div.addEventListener('click', () => openChat(c));
+                p.appendChild(div);
+            }
+            if(c.tipo === 'grupal'){
+                const div = document.createElement('div');
+                div.className = 'chat-item clickable';
+                div.innerHTML = `<div class="chat-meta"><strong>${c.nombre}</strong><small class="muted">${c.descripcion || ''}</small></div>`;
+                div.addEventListener('click', () => openChat(c));
+                g.appendChild(div);
+            }
+        });
+    }
+
+    // Abrir panel de chat
+    let currentChatToken = null;
+    function openChat(chat){
+        currentChatToken = chat.chat_token;
+        const panel = document.getElementById('chatPane');
+        panel.style.display = 'block';
+        document.getElementById('chatWith').textContent = chat.with_user ? chat.with_user.nombre : (chat.nombre || 'Chat');
+        const messages = document.getElementById('messages');
+        messages.innerHTML = '';
+        (chat.historial || []).forEach(m=>{
+            const div = document.createElement('div');
+            div.className = 'msg ' + (m.nombre_usuario === localStorage.getItem('userName') ? 'me' : '');
+            div.innerHTML = `<span class="b">${m.nombre_usuario}</span><span class="t">${m.mensaje}</span>`;
+            messages.appendChild(div);
+        });
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function createPrivateChat(userId){
+        const token = getRawToken();
+        try{
+            const res = await fetch('/api/privado', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id_destino: userId })
+            });
+            const json = await res.json();
+            if(!json.success){ alert(json.message || 'Error'); return; }
+            openChat(json.data);
+        }catch(err){ console.error(err); alert('Error al crear chat privado'); }
+    }
+
+    async function sendMessage(){
+        const input = document.getElementById('messageInput');
+        const txt = input.value.trim();
+        if(!txt || !currentChatToken) return;
+        const token = getRawToken();
+        try{
+            const res = await fetch('/api/mensaje', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_token: currentChatToken, mensaje: txt })
+            });
+            const json = await res.json();
+            if(!json.success){ alert(json.message || 'Error'); return; }
+            // Añadir al chat
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = 'msg me';
+            div.innerHTML = `<span class="b">${json.data.nombre_usuario}</span><span class="t">${json.data.mensaje}</span>`;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+            input.value = '';
+        }catch(err){ console.error(err); alert('Error al enviar mensaje'); }
+    }
+
+    function renderUserList(users){
+        const container = document.getElementById('privateUsers');
+        container.innerHTML = '';
+        if(!users.length){ container.innerHTML = '<div class="muted">No hay usuarios activos cerca</div>'; return; }
+
+        users.forEach(u=>{
+            const div = document.createElement('div');
+            div.className = 'chat-item clickable';
+
+            const online = (u.estado || '').toLowerCase() === 'online';
+            const statusDot = `<span class="status-dot ${online ? 'online' : 'offline'}" title="${online ? 'En línea' : 'No online'}" aria-hidden="true"></span>`;
+
+            div.innerHTML = `
+                <div class="chat-meta">
+                    <div style="display:flex;align-items:center;gap:8px">
+                        ${statusDot}
+                        <strong>${u.nombre}</strong>
+                    </div>
+                    <small class="muted">${u.estado} • ${u.ultima_actividad ? new Date(u.ultima_actividad).toLocaleString() : 'hace tiempo'}</small>
+                </div>
+            `;
+
+            // Cuando se hace clic en el usuario, crear o abrir chat privado
+            div.addEventListener('click', () => {
+                createPrivateChat(u.usuario_id);
+            });
+
+            container.appendChild(div);
+        });
+    }
+
+    let map, markersLayer;
+    function renderUserMap(users){
+        if(!map){
+            map = L.map('map').setView([40.4168, -3.7038], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+        }
+
+        markersLayer.clearLayers();
+        const bounds = [];
+        users.forEach(u=>{
+            if(typeof u.lat === 'number' && typeof u.lng === 'number'){
+                const popup = `<strong>${u.nombre}</strong><br>${u.estado}<br>${u.ultima_actividad ? new Date(u.ultima_actividad).toLocaleString() : ''}`;
+                const m = L.marker([u.lat, u.lng]).bindPopup(popup);
+                markersLayer.addLayer(m);
+                bounds.push([u.lat, u.lng]);
+            }
+        });
+
+        if(bounds.length) map.fitBounds(bounds, {padding:[50,50]});
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('refreshBtn');
+        btn.textContent = '🔄 Recargando...';
+        btn.style.opacity = '0.7';
+        // Recargar la página para obtener datos frescos
+        window.location.reload();
+    });
+
+    // Envío de mensaje y cerrar chat
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('closeChat').addEventListener('click', () => {
+        document.getElementById('chatPane').style.display = 'none';
+        currentChatToken = null;
+    });
 
     // Inicializar
-    fetchChats();
+    fetchUsers();
 </script>
 
 {% endblock %}

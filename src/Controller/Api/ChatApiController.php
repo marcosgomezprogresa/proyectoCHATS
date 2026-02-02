@@ -231,17 +231,23 @@ class ChatApiController extends AbstractController
 
             $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['user_token_destino'])) {
+            // Aceptamos user_token_destino (prefijo usr_tok_) o user_id_destino (id numérico)
+            if (!isset($data['user_token_destino']) && !isset($data['user_id_destino'])) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'Campo requerido: user_token_destino'
+                    'message' => 'Campo requerido: user_token_destino o user_id_destino'
                 ], 400);
             }
 
-            // Buscar usuario destino
-            $tokenDestino = str_replace('usr_tok_', '', $data['user_token_destino']);
-            $userDestino = $userRepository->findOneBy(['token' => $tokenDestino]);
-            
+            // Buscar usuario destino por token o por id
+            $userDestino = null;
+            if (isset($data['user_token_destino'])) {
+                $tokenDestino = str_replace('usr_tok_', '', $data['user_token_destino']);
+                $userDestino = $userRepository->findOneBy(['token' => $tokenDestino]);
+            } else {
+                $userDestino = $userRepository->find((int)$data['user_id_destino']);
+            }
+
             if (!$userDestino) {
                 return $this->json([
                     'success' => false,
@@ -694,20 +700,17 @@ class ChatApiController extends AbstractController
      */
     private function getUsuariosCercanos(int $currentUserId, UserRepository $userRepository): array
     {
-        $cutoff = (new \DateTime())->modify('-15 minutes');
-
+        // Mostrar usuarios que están activos y comparten ubicación y que además estén en estado ONLINE
         $qb = $userRepository->createQueryBuilder('u')
             ->where('u.activo = :activo')
             ->andWhere('u.compartirUbicacion = :compartir')
             ->andWhere('u.latitud IS NOT NULL')
             ->andWhere('u.longitud IS NOT NULL')
-            ->andWhere('u.ultimaActividad >= :cutoff')
-            ->setParameters([
-                'activo' => true,
-                'compartir' => true,
-                'cutoff' => $cutoff
-            ])
-            ->setMaxResults(50);
+            ->andWhere('u.estado = :estado')
+            ->setParameter('activo', true)
+            ->setParameter('compartir', true)
+            ->setParameter('estado', EstadoUsuario::ONLINE->value)
+            ->setMaxResults(100);
 
         $users = $qb->getQuery()->getResult();
 

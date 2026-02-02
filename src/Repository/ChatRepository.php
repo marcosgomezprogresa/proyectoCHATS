@@ -40,4 +40,24 @@ class ChatRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * Busca chats que contienen al usuario especificado (únicamente chats donde el usuario participa)
+     *
+     * @param mixed $user User entity or user id
+     * @return Chat[]
+     */
+    public function findChatsByUser($user): array
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->innerJoin('c.usuariosChat', 'uc')
+            ->innerJoin('uc.usuario', 'u')
+            ->andWhere('u.id = :uid')
+            ->setParameter('uid', $user instanceof \App\Entity\User ? $user->getId() : $user)
+            ->orderBy('c.fechaCreacion', 'DESC')
+            ->setMaxResults(50);
+
+        return $qb->getQuery()->getResult();
+    }
 }
+
