@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Chats - Login{% endblock %}
+{% block title %}Chats - Registro{% endblock %}
 
 {% block body %}
 <style>
@@ -27,7 +27,6 @@
         width: 100%;
         max-width: 400px;
         padding: 50px 40px;
-        position: relative;
     }
     
     .auth-logo {
@@ -76,6 +75,27 @@
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .password-requirements {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+    }
+    
+    .password-strength {
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+    
+    .password-strength-bar {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s, background-color 0.3s;
+        background-color: #ddd;
     }
     
     .btn-submit {
@@ -171,40 +191,21 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-    
-    .endpoints-btn {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: #667eea;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 12px;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.3s;
-    }
-    
-    .endpoints-btn:hover {
-        background: #764ba2;
-        text-decoration: none;
-        color: white;
-    }
 </style>
 
 <div class="auth-container">
-    <a href="/proyectoChats/public/endpoints" class="endpoints-btn">📋 API Docs</a>
-    
     <div class="auth-logo">💬</div>
-    <h1 class="auth-title">Iniciar Sesión</h1>
-    <p class="auth-subtitle">Bienvenido de vuelta</p>
+    <h1 class="auth-title">Crear Cuenta</h1>
+    <p class="auth-subtitle">Únete a nuestros chats</p>
     
     <div id="alert" class="alert"></div>
     
-    <form id="loginForm">
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="nombre">Nombre Completo</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
+        </div>
+        
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="tu@email.com" required>
@@ -212,47 +213,78 @@
         
         <div class="form-group">
             <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" required>
+            <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" required>
+            <div class="password-strength">
+                <div class="password-strength-bar" id="strengthBar"></div>
+            </div>
+            <div class="password-requirements">
+                ✓ Mínimo 6 caracteres
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="passwordConfirm">Confirmar Contraseña</label>
+            <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="Repite tu contraseña" required>
         </div>
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <span>Iniciando sesión...</span>
+            <span>Creando cuenta...</span>
         </div>
         
-        <button type="submit" class="btn-submit" id="submitBtn">Iniciar Sesión</button>
+        <button type="submit" class="btn-submit" id="submitBtn">Registrarse</button>
     </form>
     
     <p class="auth-link">
-        ¿No tienes cuenta? <a href="/proyectoChats/public/register">Regístrate aquí</a>
+        ¿Ya tienes cuenta? <a href="/proyectoChats/public/login">Inicia sesión aquí</a>
     </p>
 </div>
 
 <script>
-    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const nombreInput = document.getElementById('nombre');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    const passwordConfirmInput = document.getElementById('passwordConfirm');
     const submitBtn = document.getElementById('submitBtn');
     const loadingDiv = document.getElementById('loading');
     const alertDiv = document.getElementById('alert');
+    const strengthBar = document.getElementById('strengthBar');
     
-    // Restaurar email si existe en localStorage
-    window.addEventListener('load', () => {
-        const savedEmail = localStorage.getItem('lastEmail');
-        if (savedEmail) {
-            emailInput.value = savedEmail;
-        }
+    // Actualizar indicador de fuerza de contraseña
+    passwordInput.addEventListener('input', () => {
+        const password = passwordInput.value;
+        let strength = 0;
+        
+        if (password.length >= 6) strength += 25;
+        if (password.length >= 10) strength += 25;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
+        if (/[0-9]/.test(password)) strength += 25;
+        
+        strengthBar.style.width = strength + '%';
+        
+        if (strength <= 25) strengthBar.style.backgroundColor = '#f44336';
+        else if (strength <= 50) strengthBar.style.backgroundColor = '#ff9800';
+        else if (strength <= 75) strengthBar.style.backgroundColor = '#ffc107';
+        else strengthBar.style.backgroundColor = '#4caf50';
     });
     
-    loginForm.addEventListener('submit', async (e) => {
+    registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const nombre = nombreInput.value.trim();
         const email = emailInput.value.trim();
         const password = passwordInput.value;
+        const passwordConfirm = passwordConfirmInput.value;
         
         // Validaciones
-        if (!email || !password) {
+        if (!nombre || !email || !password || !passwordConfirm) {
             showAlert('Por favor completa todos los campos', 'error');
+            return;
+        }
+        
+        if (nombre.length < 3) {
+            showAlert('El nombre debe tener al menos 3 caracteres', 'error');
             return;
         }
         
@@ -261,36 +293,50 @@
             return;
         }
         
+        if (password.length < 6) {
+            showAlert('La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+        }
+        
+        if (password !== passwordConfirm) {
+            showAlert('Las contraseñas no coinciden', 'error');
+            return;
+        }
+        
         submitBtn.disabled = true;
         loadingDiv.style.display = 'block';
         alertDiv.classList.remove('show');
         
         try {
-            const response = await fetch('/proyectoChats/public/api/login', {
+            const response = await fetch('/proyectoChats/public/api/usuarios', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ 
+                    nombre, 
+                    email, 
+                    password 
+                })
             });
             
             const data = await response.json();
             
             if (data.success) {
-                // Guardar datos de sesión
+                // Guardar datos de sesión automáticamente
                 localStorage.setItem('userToken', data.data.user_token);
-                localStorage.setItem('userName', data.data.user_profile.nombre);
-                localStorage.setItem('userEmail', data.data.user_profile.email);
+                localStorage.setItem('userName', data.data.usuario.nombre);
+                localStorage.setItem('userEmail', data.data.usuario.email);
                 localStorage.setItem('lastEmail', email);
                 
-                showAlert('¡Login exitoso! Redirigiendo...', 'success');
+                showAlert('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
                 
                 // Redirigir al home después de 1.5 segundos
                 setTimeout(() => {
                     window.location.href = '/proyectoChats/public/home';
                 }, 1500);
             } else {
-                showAlert(data.message || 'Error en el login', 'error');
+                showAlert(data.message || 'Error al registrar', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
