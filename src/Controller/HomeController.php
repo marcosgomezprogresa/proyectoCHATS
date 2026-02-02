@@ -73,18 +73,26 @@ class HomeController extends AbstractController
                 'metodo' => 'GET',
                 'ruta' => 'GET /api/usuarios/perfil',
                 'acceso' => 'Token (usuario autenticado)',
-                'descripcion' => 'Obtiene el perfil completo del usuario autenticado.',
-                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'descripcion' => 'Obtiene el perfil completo del usuario autenticado con estadísticas de chats y mensajes.',
+                'request' => 'Headers:
+Authorization: Bearer <token>
+Content-Type: application/json
+
+Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "message": "Perfil obtenido exitosamente",
   "data": {
-    "usuario_id": 1,
-    "email": "juan@email.com",
-    "nombre": "Juan",
+    "usuario_id": 37,
+    "email": "admin@chat.com",
+    "nombre": "Administrador",
     "estado": "online",
-    "avatar_url": "https://...",
-    "fecha_registro": "2024-01-16T14:30:00Z"
+    "avatar_url": null,
+    "fecha_registro": "2026-02-02T18:52:19Z",
+    "estadisticas": {
+      "chats_activos": 5,
+      "mensajes_totales": 0
+    }
   }
 }',
             ],
@@ -154,16 +162,50 @@ class HomeController extends AbstractController
                 'id' => 3,
                 'nombre' => 'API/Home',
                 'metodo' => 'GET',
+                'ruta' => 'GET /api/home',
                 'acceso' => 'Token',
-                'descripcion' => 'Punto de entrada principal tras el login. Devuelve datos resumen: usuario, lista de chats activos y usuarios cercanos en línea.',
-                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'descripcion' => 'Punto de entrada principal tras el login. Devuelve datos resumen: usuario, lista de chats activos con último mensaje, usuarios cercanos (dentro de 5km) con distancias en km.',
+                'request' => 'Headers:
+Authorization: Bearer <token>
+Content-Type: application/json
+
+Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "data": {
-    "usuario_actual": {...},
-    "chats_activos": [...],
-    "usuarios_cercanos": [...],
-    "estadisticas": {...}
+    "usuario_actual": {
+      "usuario_id": 37,
+      "email": "admin@chat.com",
+      "nombre": "Administrador",
+      "estado": "online"
+    },
+    "chats_activos": [
+      {
+        "chat_token": "chat_priv_20",
+        "tipo": "privado",
+        "with_user": {
+          "id": 38,
+          "nombre": "Moderador",
+          "estado": "online"
+        },
+        "ultimo_mensaje": "Hola",
+        "ultimo_mensaje_time": "2026-02-02T19:00:00Z",
+        "mensajes_no_leidos": 0
+      }
+    ],
+    "usuarios_cercanos": [
+      {
+        "id": 38,
+        "nombre": "Moderador",
+        "estado": "online",
+        "distancia_km": 0.87,
+        "ultima_actividad": "2026-02-02T19:00:00Z"
+      }
+    ],
+    "estadisticas": {
+      "usuarios_online_cerca": 1,
+      "radio_km": 5
+    }
   }
 }',
             ],
@@ -171,22 +213,36 @@ class HomeController extends AbstractController
                 'id' => 4,
                 'nombre' => 'API/General',
                 'metodo' => 'GET / POST',
+                'ruta' => 'GET /api/general?page=1&limit=20 / POST /api/general',
                 'acceso' => 'Token',
-                'descripcion' => 'Gestiona el chat grupal público de la zona (~5 km). GET obtiene el historial, POST envía un mensaje nuevo.',
-                'request' => '{
+                'descripcion' => 'Gestiona el chat grupal público de la zona (~5 km). GET obtiene el historial con paginación, POST envía un mensaje nuevo.',
+                'request' => 'GET: Headers:
+Authorization: Bearer <token>
+
+POST: {
   "mensaje": "¿Alguien quiere charlar?",
   "tipo": "texto"
 }',
                 'response' => '{
   "success": true,
   "data": {
-    "mensaje_token": "msg_003",
-    "chat_token": "chat_general_1",
-    "nombre_usuario": "Ana",
-    "mensaje": "¿Alguien quiere charlar?",
-    "fecha_hora": "2024-01-16T10:35:00Z",
-    "tipo": "texto",
-    "estado": "entregado"
+    "mensajes": [
+      {
+        "mensaje_token": "msg_789",
+        "chat_token": "chat_general_1",
+        "nombre_usuario": "Ana",
+        "mensaje": "¿Alguien quiere charlar?",
+        "fecha_hora": "2026-02-02T19:00:00Z",
+        "tipo": "texto",
+        "estado": "entregado"
+      }
+    ],
+    "paginacion": {
+      "total_mensajes": 150,
+      "pagina_actual": 1,
+      "mensajes_por_pagina": 20,
+      "tiene_mas": true
+    }
   }
 }',
             ],
@@ -194,42 +250,72 @@ class HomeController extends AbstractController
                 'id' => 5,
                 'nombre' => 'API/Privado',
                 'metodo' => 'POST',
+                'ruta' => 'POST /api/privado',
                 'acceso' => 'Token',
-                'descripcion' => 'Crea o accede a un chat privado con otro usuario. Se le pasa el user_token del destinatario.',
-                'request' => '{
-  "user_token_destino": "usr_tok_carlos123..."
+                'descripcion' => 'Crea o accede a un chat privado con otro usuario. Se valida que ambos usuarios estén dentro de 5km. Devuelve error si está fuera de rango o el usuario está bloqueado.',
+                'request' => 'Headers:
+Authorization: Bearer <token>
+
+Body:
+{
+  "user_id_destino": 38
 }',
                 'response' => '{
   "success": true,
   "data": {
-    "chat_token": "chat_priv_16",
+    "chat_token": "chat_priv_26",
     "tipo": "privado",
-    "with_user": {...},
-    "historial": [...],
-    "created": false,
-    "timestamp": "2024-01-16T10:35:00Z"
+    "with_user": {
+      "id": 38,
+      "user_token": "usr_tok_c2fd62e7153a589ed49ddc79b3f5a6e00084aff7cd59c0961e5d70ef9511d408",
+      "nombre": "Moderador",
+      "estado": "online",
+      "distancia_km": 0.87,
+      "ultima_actividad": "2026-02-02T19:00:00Z"
+    },
+    "historial": [],
+    "created": true,
+    "timestamp": "2026-02-02T19:05:00Z"
   }
+}
+
+Errores posibles:
+{
+  "success": false,
+  "error_code": "OUT_OF_RANGE",
+  "message": "El usuario está fuera del rango de 5km"
+}
+
+{
+  "success": false,
+  "error_code": "USER_NOT_FOUND",
+  "message": "Usuario no encontrado"
 }',
             ],
             [
                 'id' => 6,
                 'nombre' => 'API/Mensaje',
                 'metodo' => 'POST',
+                'ruta' => 'POST /api/mensaje',
                 'acceso' => 'Token',
-                'descripcion' => 'Envía un mensaje a un chat (ya sea privado o general). Requiere el chat_token y el texto.',
-                'request' => '{
-  "chat_token": "chat_priv_15",
-  "mensaje": "Perfecto, nos vemos a las 6",
+                'descripcion' => 'Envía un mensaje a un chat (ya sea privado o general). Requiere el chat_token y el contenido del mensaje.',
+                'request' => 'Headers:
+Authorization: Bearer <token>
+
+Body:
+{
+  "chat_token": "chat_priv_26",
+  "mensaje": "Hola, ¿cómo estás?",
   "tipo": "texto"
 }',
                 'response' => '{
   "success": true,
   "data": {
     "mensaje_token": "msg_789",
-    "chat_token": "chat_priv_15",
-    "nombre_usuario": "Ana",
-    "mensaje": "Perfecto, nos vemos a las 6",
-    "fecha_hora": "2024-01-16T10:35:00Z",
+    "chat_token": "chat_priv_26",
+    "nombre_usuario": "Administrador",
+    "mensaje": "Hola, ¿cómo estás?",
+    "fecha_hora": "2026-02-02T19:05:00Z",
     "tipo": "texto",
     "estado": "entregado"
   }

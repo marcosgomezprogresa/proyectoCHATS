@@ -26,12 +26,15 @@ class AppFixtures extends Fixture
         // 1 ADMIN y 3 usuarios normales
         $usuarios = [];
         
-        // USUARIO ADMIN
+        // USUARIO ADMIN (Valencia, España - Centro)
         $admin = new User();
         $admin->setEmail('admin@chat.com');
         $admin->setNombre('Administrador');
         $admin->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
         $admin->setEstado(EstadoUsuario::ONLINE);
+        $admin->setLatitud(39.4699);  // Valencia
+        $admin->setLongitud(-0.3763);
+        $admin->setUltimaUbicacion(new \DateTime());
         
         $hashedPassword = $this->passwordHasher->hashPassword($admin, 'admin123');
         $admin->setPassword($hashedPassword);
@@ -42,9 +45,9 @@ class AppFixtures extends Fixture
         
         // USUARIOS NORMALES
         $usuariosData = [
-            ['email' => 'moderador@chat.com', 'nombre' => 'Moderador', 'password' => 'mod123'],
-            ['email' => 'soporte@chat.com', 'nombre' => 'Soporte', 'password' => 'soporte123'],
-            ['email' => 'bot_general@chat.com', 'nombre' => 'Bot General', 'password' => 'bot123'],
+            ['email' => 'moderador@chat.com', 'nombre' => 'Moderador', 'password' => 'mod123', 'lat' => 39.4720, 'lon' => -0.3750],
+            ['email' => 'soporte@chat.com', 'nombre' => 'Soporte', 'password' => 'soporte123', 'lat' => 39.4680, 'lon' => -0.3780],
+            ['email' => 'bot_general@chat.com', 'nombre' => 'Bot General', 'password' => 'bot123', 'lat' => 39.4700, 'lon' => -0.3750],
         ];
 
         foreach ($usuariosData as $data) {
@@ -53,6 +56,9 @@ class AppFixtures extends Fixture
             $user->setNombre($data['nombre']);
             $user->setRoles(['ROLE_USER']); // Solo ROLE_USER
             $user->setEstado(EstadoUsuario::ONLINE);
+            $user->setLatitud($data['lat']);
+            $user->setLongitud($data['lon']);
+            $user->setUltimaUbicacion(new \DateTime());
             
             $hashedPassword = $this->passwordHasher->hashPassword($user, $data['password']);
             $user->setPassword($hashedPassword);

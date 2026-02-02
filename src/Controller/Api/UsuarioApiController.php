@@ -5,6 +5,8 @@ namespace App\Controller\Api;
 use App\Entity\User;
 use App\Enum\EstadoUsuario;
 use App\Repository\UserRepository;
+use App\Repository\MensajeRepository;
+use App\Repository\ChatRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -123,7 +125,9 @@ class UsuarioApiController extends AbstractController
     #[Route('/perfil', name: 'read_my_profile', methods: ['GET'])]
     public function readMyProfile(
         Request $request,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        ChatRepository $chatRepository,
+        MensajeRepository $mensajeRepository
     ): JsonResponse {
         try {
             // Obtener usuario autenticado
@@ -135,11 +139,25 @@ class UsuarioApiController extends AbstractController
                 ], 401);
             }
 
-            // Devolver perfil
+            // Calcular estadísticas - usando relación directa
+            $usuariosChat = $user->getUsuariosChat();
+            $chatsActivos = $usuariosChat ? count($usuariosChat) : 0;
+            
+            // Mensajes totales
+            $mensajes = $mensajeRepository->findBy(['usuario' => $user]);
+            $mensajesTotales = $mensajes ? count($mensajes) : 0;
+
+            // Devolver perfil con estadísticas
+            $profileData = $this->serializeMyProfile($user);
+            $profileData['estadisticas'] = [
+                'chats_activos' => $chatsActivos,
+                'mensajes_totales' => $mensajesTotales
+            ];
+
             return $this->json([
                 'success' => true,
                 'message' => 'Perfil obtenido exitosamente',
-                'data' => $this->serializeMyProfile($user)
+                'data' => $profileData
             ], 200);
 
         } catch (\Exception $e) {

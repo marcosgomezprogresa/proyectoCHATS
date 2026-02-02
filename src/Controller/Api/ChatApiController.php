@@ -9,6 +9,8 @@ use App\Enum\EstadoUsuario;
 use App\Repository\ChatRepository;
 use App\Repository\UsuarioChatRepository;
 use App\Repository\UserRepository;
+use App\Repository\MensajeRepository;
+use App\Service\GeoLocationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -43,7 +45,9 @@ class ChatApiController extends AbstractController
     public function home(
         Request $request,
         UserRepository $userRepository,
-        ChatRepository $chatRepository
+        ChatRepository $chatRepository,
+        MensajeRepository $mensajeRepository,
+        GeoLocationService $geoService
     ): JsonResponse {
         try {
             $user = $this->getAuthenticatedUser($request, $userRepository);
@@ -56,9 +60,47 @@ class ChatApiController extends AbstractController
 
             // Obtener chats del usuario
             $chats = $chatRepository->findChatsByUser($user);
-            $chatsData = array_map(function (Chat $chat) {
-                return $this->serializeChat($chat);
+            $chatsData = array_map(function (Chat $chat) use ($mensajeRepository) {
+                $data = $this->serializeChat($chat);
+                
+                // Obtener último mensaje del chat
+                $ultimoMensaje = $mensajeRepository->findOneBy(['chat' => $chat], ['fechaHora' => 'DESC']);
+                if ($ultimoMensaje) {
+                    $data['ultimo_mensaje'] = $ultimoMensaje->getContenido();
+                    $data['ultimo_mensaje_time'] = $ultimoMensaje->getFechaHora()?->format('Y-m-d\TH:i:s\Z');
+                } else {
+                    $data['ultimo_mensaje'] = null;
+                    $data['ultimo_mensaje_time'] = null;
+                }
+                
+                $data['mensajes_no_leidos'] = 0;
+                
+                return $data;
             }, $chats);
+
+            // Obtener usuarios cercanos dentro de 5km
+            $todosUsuarios = $userRepository->findAll();
+            $usuariosCercanos = [];
+            
+            foreach ($todosUsuarios as $otroUsuario) {
+                if ($otroUsuario->getId() === $user->getId()) {
+                    continue;
+                }
+                
+                // Calcular distancia
+                $distancia = $geoService->getDistanceBetweenUsers($user, $otroUsuario);
+                
+                if ($distancia && $distancia <= 5.0 && $otroUsuario->getEstado()->value === 'online') {
+                    $usuariosCercanos[] = [
+                        'user_token' => 'usr_tok_' . $otroUsuario->getToken(),
+                        'nombre' => $otroUsuario->getNombre(),
+                        'estado' => $otroUsuario->getEstado()->value,
+                        'distancia_km' => round($distancia, 2),
+                        'ultima_actividad' => $otroUsuario->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z'),
+                        'avatar_url' => $otroUsuario->getAvatarUrl() ?? ''
+                    ];
+                }
+            }
 
             return $this->json([
                 'success' => true,
@@ -69,10 +111,12 @@ class ChatApiController extends AbstractController
                         'estado' => $user->getEstado()->value
                     ],
                     'chats_activos' => $chatsData,
-                    'usuarios_cercanos' => [],
+                    'usuarios_cercanos' => $usuariosCercanos,
                     'estadisticas' => [
                         'total_chats' => count($chatsData),
-                        'mensajes_no_leidos' => 0
+                        'mensajes_no_leidos' => 0,
+                        'usuarios_online_cerca' => count($usuariosCercanos),
+                        'radio_km' => 5.0
                     ]
                 ]
             ], 200);
@@ -101,7 +145,8 @@ class ChatApiController extends AbstractController
     public function getGeneral(
         Request $request,
         UserRepository $userRepository,
-        ChatRepository $chatRepository
+        ChatRepository $chatRepository,
+        MensajeRepository $mensajeRepository
     ): JsonResponse {
         try {
             $user = $this->getAuthenticatedUser($request, $userRepository);
@@ -121,9 +166,42 @@ class ChatApiController extends AbstractController
                 ], 404);
             }
 
+            // Paginación
+            $page = max(1, (int)($request->query->get('page') ?? 1));
+            $limit = min(50, (int)($request->query->get('limit') ?? 20));
+            $offset = ($page - 1) * $limit;
+
+            // Obtener total de mensajes
+            $todosMensajes = $mensajeRepository->findBy(['chat' => $chat], ['fechaHora' => 'DESC']);
+            $totalMensajes = count($todosMensajes);
+
+            // Obtener mensajes paginados
+            $mensajesPaginados = array_slice($todosMensajes, $offset, $limit);
+            
+            $mensajes = array_map(function ($msg) {
+                return [
+                    'mensaje_token' => 'msg_' . $msg->getId(),
+                    'user_token' => 'usr_tok_' . $msg->getUsuario()->getToken(),
+                    'nombre_usuario' => $msg->getUsuario()->getNombre(),
+                    'avatar_url' => $msg->getUsuario()->getAvatarUrl() ?? '',
+                    'mensaje' => $msg->getContenido(),
+                    'fecha_hora' => $msg->getFechaHora()?->format('Y-m-d\TH:i:s\Z'),
+                    'tipo' => $msg->getTipo()->value
+                ];
+            }, $mensajesPaginados);
+
             return $this->json([
                 'success' => true,
-                'data' => $this->serializeChat($chat)
+                'data' => array_merge($this->serializeChat($chat), [
+                    'cantidad_usuarios' => count($chat->getUsuariosChat()),
+                    'mensajes' => $mensajes,
+                    'paginacion' => [
+                        'total_mensajes' => $totalMensajes,
+                        'pagina_actual' => $page,
+                        'mensajes_por_pagina' => $limit,
+                        'tiene_mas' => ($offset + $limit) < $totalMensajes
+                    ]
+                ])
             ], 200);
 
         } catch (\Exception $e) {
@@ -218,6 +296,8 @@ class ChatApiController extends AbstractController
         Request $request,
         UserRepository $userRepository,
         ChatRepository $chatRepository,
+        MensajeRepository $mensajeRepository,
+        GeoLocationService $geoService,
         EntityManagerInterface $em
     ): JsonResponse {
         try {
@@ -251,22 +331,80 @@ class ChatApiController extends AbstractController
             if (!$userDestino) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'Usuario destino no encontrado'
+                    'error' => [
+                        'code' => 'USER_NOT_FOUND',
+                        'message' => 'Usuario destino no encontrado'
+                    ]
                 ], 404);
             }
+
+            // VALIDAR: Verificar si están dentro del radio de 5km
+            if (!$geoService->isWithinRadius($user, $userDestino, 5.0)) {
+                $distancia = $geoService->getDistanceBetweenUsers($user, $userDestino) ?? 999;
+                return $this->json([
+                    'success' => false,
+                    'error' => [
+                        'code' => 'OUT_OF_RANGE',
+                        'message' => 'El usuario está fuera de tu radio de 5km',
+                        'details' => [
+                            'distancia_km' => round($distancia, 2),
+                            'max_distancia_km' => 5.0
+                        ]
+                    ]
+                ], 400);
+            }
+
+            // TODO: Verificar bloqueos (USER_BLOCKED)
+            
+            // Obtener o crear chat privado
+            $chat = $chatRepository->findOneBy([
+                'tipo' => TipoChat::PRIVADO,
+                // Buscar entre los usuariosChat del usuario actual
+            ]);
+
+            $created = false;
+            if (!$chat) {
+                $chat = new Chat();
+                $chat->setNombre('Chat Privado - ' . $userDestino->getNombre());
+                $chat->setDescripcion('Chat privado');
+                $chat->setTipo(TipoChat::PRIVADO);
+                $chat->setActivo(true);
+                $chat->setFechaCreacion(new \DateTimeImmutable());
+                $chat->setRadioKm(0); // No tiene radio, es privado
+                
+                $em->persist($chat);
+                $em->flush();
+                $created = true;
+            }
+
+            // Obtener historial de mensajes
+            $mensajes = $mensajeRepository->findBy(['chat' => $chat], ['fechaHora' => 'ASC']);
+            $historial = array_map(function ($msg) {
+                return [
+                    'mensaje_token' => 'msg_' . $msg->getId(),
+                    'user_token' => 'usr_tok_' . ($msg->getUsuario()->getToken() ?? ''),
+                    'nombre_usuario' => $msg->getUsuario()->getNombre(),
+                    'mensaje' => $msg->getContenido(),
+                    'fecha_hora' => $msg->getFechaHora()?->format('Y-m-d\TH:i:s\Z'),
+                    'tipo' => $msg->getTipo()->value
+                ];
+            }, $mensajes);
 
             return $this->json([
                 'success' => true,
                 'data' => [
-                    'chat_token' => 'chat_priv_' . uniqid(),
+                    'chat_token' => 'chat_priv_' . $chat->getId(),
                     'tipo' => 'privado',
                     'with_user' => [
                         'id' => $userDestino->getId(),
+                        'user_token' => 'usr_tok_' . $userDestino->getToken(),
                         'nombre' => $userDestino->getNombre(),
-                        'estado' => $userDestino->getEstado()->value
+                        'estado' => $userDestino->getEstado()->value,
+                        'distancia_km' => round($geoService->getDistanceBetweenUsers($user, $userDestino) ?? 0, 2),
+                        'ultima_actividad' => $userDestino->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z')
                     ],
-                    'historial' => [],
-                    'created' => true,
+                    'historial' => $historial,
+                    'created' => $created,
                     'timestamp' => (new \DateTime())->format('Y-m-d\TH:i:s\Z')
                 ]
             ], 201);
@@ -535,116 +673,6 @@ class ChatApiController extends AbstractController
         }
     }
 
-    // ============ PERFIL (GET Y PATCH) ============
-    
-    /**
-     * GET /api/perfil
-     * 
-     * Obtiene la información pública del perfil del usuario.
-     * 
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @return JsonResponse
-     */
-    #[Route('/perfil', name: 'get_profile', methods: ['GET'])]
-    public function getProfile(
-        Request $request,
-        UserRepository $userRepository
-    ): JsonResponse {
-        try {
-            $user = $this->getAuthenticatedUser($request, $userRepository);
-            if (!$user) {
-                return $this->json([
-                    'success' => false,
-                    'message' => 'No autenticado'
-                ], 401);
-            }
-
-            return $this->json([
-                'success' => true,
-                'data' => [
-                    'user_token' => 'usr_tok_' . $user->getToken(),
-                    'nombre' => $user->getNombre(),
-                    'estado' => $user->getEstado()->value,
-                    'ultima_actividad' => $user->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z'),
-                    'puedo_chatear' => true
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * PATCH /api/perfil
-     * 
-     * Actualiza la información del perfil del usuario.
-     * 
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @param EntityManagerInterface $em
-     * @return JsonResponse
-     */
-    #[Route('/perfil', name: 'update_profile', methods: ['PATCH'])]
-    public function updateProfile(
-        Request $request,
-        UserRepository $userRepository,
-        EntityManagerInterface $em
-    ): JsonResponse {
-        try {
-            $user = $this->getAuthenticatedUser($request, $userRepository);
-            if (!$user) {
-                return $this->json([
-                    'success' => false,
-                    'message' => 'No autenticado'
-                ], 401);
-            }
-
-            $data = json_decode($request->getContent(), true);
-
-            if (isset($data['nombre'])) {
-                $user->setNombre($data['nombre']);
-            }
-
-            if (isset($data['estado'])) {
-                try {
-                    $user->setEstado(EstadoUsuario::from($data['estado']));
-                } catch (\ValueError $e) {
-                    return $this->json([
-                        'success' => false,
-                        'message' => 'Estado inválido'
-                    ], 422);
-                }
-            }
-
-            $em->persist($user);
-            $em->flush();
-
-            return $this->json([
-                'success' => true,
-                'data' => [
-                    'user_token' => 'usr_tok_' . $user->getToken(),
-                    'nombre' => $user->getNombre(),
-                    'estado' => $user->getEstado()->value,
-                    'ultima_actividad' => $user->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z'),
-                    'puedo_chatear' => true
-                ]
-            ], 200);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // ============ MÉTODOS AUXILIARES ============
-    
     /**
      * Obtiene el usuario autenticado desde el token del header
      */
