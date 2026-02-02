@@ -44,16 +44,17 @@ class AuthApiController extends AbstractController
             // Decodificar el JSON del request
             $data = json_decode($request->getContent(), true);
 
-            // Validar que existan los campos requeridos
-            if (!isset($data['usuario']) || !isset($data['password'])) {
+            // Validar que existan los campos requeridos (aceptamos 'usuario' o 'email')
+            $email = $data['usuario'] ?? $data['email'] ?? null;
+            if (!$email || !isset($data['password'])) {
                 return $this->json([
                     'success' => false,
-                    'message' => 'Faltan campos requeridos: usuario (email), password'
+                    'message' => 'Faltan campos requeridos: usuario|email, password'
                 ], 400);
             }
 
             // Buscar el usuario por email
-            $user = $userRepository->findOneBy(['email' => $data['usuario']]);
+            $user = $userRepository->findOneBy(['email' => $email]);
             
             // Si no existe o la contraseña es incorrecta
             if (!$user || !$passwordHasher->isPasswordValid($user, $data['password'])) {
