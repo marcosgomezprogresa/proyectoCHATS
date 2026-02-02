@@ -23,9 +23,25 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         // ============ CREAR USUARIOS PERMANENTES ============
+        // 1 ADMIN y 3 usuarios normales
         $usuarios = [];
+        
+        // USUARIO ADMIN
+        $admin = new User();
+        $admin->setEmail('admin@chat.com');
+        $admin->setNombre('Administrador');
+        $admin->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
+        $admin->setEstado(EstadoUsuario::ONLINE);
+        
+        $hashedPassword = $this->passwordHasher->hashPassword($admin, 'admin123');
+        $admin->setPassword($hashedPassword);
+        $admin->setToken(bin2hex(random_bytes(32)));
+        
+        $manager->persist($admin);
+        $usuarios[] = $admin;
+        
+        // USUARIOS NORMALES
         $usuariosData = [
-            ['email' => 'admin@chat.com', 'nombre' => 'Admin', 'password' => 'admin123'],
             ['email' => 'moderador@chat.com', 'nombre' => 'Moderador', 'password' => 'mod123'],
             ['email' => 'soporte@chat.com', 'nombre' => 'Soporte', 'password' => 'soporte123'],
             ['email' => 'bot_general@chat.com', 'nombre' => 'Bot General', 'password' => 'bot123'],
@@ -35,14 +51,11 @@ class AppFixtures extends Fixture
             $user = new User();
             $user->setEmail($data['email']);
             $user->setNombre($data['nombre']);
-            $user->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
+            $user->setRoles(['ROLE_USER']); // Solo ROLE_USER
             $user->setEstado(EstadoUsuario::ONLINE);
             
-            // Hash de la contraseña
             $hashedPassword = $this->passwordHasher->hashPassword($user, $data['password']);
             $user->setPassword($hashedPassword);
-            
-            // Generar token único
             $user->setToken(bin2hex(random_bytes(32)));
             
             $manager->persist($user);

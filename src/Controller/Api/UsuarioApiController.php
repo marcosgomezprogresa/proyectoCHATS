@@ -139,7 +139,7 @@ class UsuarioApiController extends AbstractController
             return $this->json([
                 'success' => true,
                 'message' => 'Perfil obtenido exitosamente',
-                'data' => $this->serializeUser($user)
+                'data' => $this->serializeMyProfile($user)
             ], 200);
 
         } catch (\Exception $e) {
@@ -192,7 +192,7 @@ class UsuarioApiController extends AbstractController
             return $this->json([
                 'success' => true,
                 'message' => 'Perfil obtenido exitosamente',
-                'data' => $this->serializeUser($user)
+                'data' => $this->serializePublicProfile($user)
             ], 200);
 
         } catch (\Exception $e) {
@@ -282,7 +282,7 @@ class UsuarioApiController extends AbstractController
             return $this->json([
                 'success' => true,
                 'message' => 'Perfil actualizado exitosamente',
-                'data' => $this->serializeUser($user)
+                'data' => $this->serializeMyProfile($user)
             ], 200);
 
         } catch (\Exception $e) {
@@ -398,12 +398,9 @@ class UsuarioApiController extends AbstractController
     }
 
     /**
-     * Serializa un usuario a array para la respuesta JSON
-     * 
-     * @param User $user
-     * @return array Datos del usuario formateados
+     * Serializa un usuario para Mi Perfil (completo)
      */
-    private function serializeUser(User $user): array
+    private function serializeMyProfile(User $user): array
     {
         return [
             'usuario_id' => $user->getId(),
@@ -411,14 +408,22 @@ class UsuarioApiController extends AbstractController
             'nombre' => $user->getNombre(),
             'estado' => $user->getEstado()->value,
             'avatar_url' => $user->getAvatarUrl(),
-            'ultima_actividad' => $user->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z'),
-            // Datos de ubicación y visibilidad
-            'latitud' => $user->getLatitud(),
-            'longitud' => $user->getLongitud(),
-            'compartir_ubicacion' => $user->isCompartirUbicacion(),
-            'activo' => $user->isActivo(),
-            'radio_visibilidad_km' => $user->getRadioVisibilidadKm(),
-            'puedo_chatear' => true
+            'fecha_registro' => $user->getFechaRegistro()?->format('Y-m-d\TH:i:s\Z')
+        ];
+    }
+
+    /**
+     * Serializa un usuario para Perfil Público (otro usuario)
+     */
+    private function serializePublicProfile(User $user): array
+    {
+        return [
+            'usuario_id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'nombre' => $user->getNombre(),
+            'estado' => $user->getEstado()->value,
+            'avatar_url' => $user->getAvatarUrl(),
+            'ultima_actividad' => $user->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z')
         ];
     }
 }
