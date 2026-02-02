@@ -236,7 +236,7 @@
     </form>
     
     <p class="auth-link">
-        ¿Ya tienes cuenta? <a href="/proyectoChats/public/login">Inicia sesión aquí</a>
+        ¿Ya tienes cuenta? <a href="{{ url('app_login') }}">Inicia sesión aquí</a>
     </p>
 </div>
 
@@ -308,7 +308,7 @@
         alertDiv.classList.remove('show');
         
         try {
-            const response = await fetch('/proyectoChats/public/api/usuarios', {
+            const response = await fetch('{{ url('api_usuarios_create') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -331,9 +331,10 @@
                 
                 showAlert('¡Cuenta creada exitosamente! Redirigiendo...', 'success');
                 
-                // Redirigir al home después de 1.5 segundos
+                // Redirigir al home usando la URL que devuelva el servidor si existe
+                const redirectUrl = data?.data?.redirect_url || '{{ url('app_home') }}';
                 setTimeout(() => {
-                    window.location.href = '/proyectoChats/public/home';
+                    window.location.href = redirectUrl;
                 }, 1500);
             } else {
                 showAlert(data.message || 'Error al registrar', 'error');

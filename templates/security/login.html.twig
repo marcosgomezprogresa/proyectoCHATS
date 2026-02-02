@@ -196,7 +196,7 @@
 </style>
 
 <div class="auth-container">
-    <a href="/proyectoChats/public/endpoints" class="endpoints-btn">📋 API Docs</a>
+    <a href="{{ url('app_endpoints') }}" class="endpoints-btn">📋 API Docs</a>
     
     <div class="auth-logo">💬</div>
     <h1 class="auth-title">Iniciar Sesión</h1>
@@ -224,7 +224,7 @@
     </form>
     
     <p class="auth-link">
-        ¿No tienes cuenta? <a href="/proyectoChats/public/register">Regístrate aquí</a>
+        ¿No tienes cuenta? <a href="{{ url('app_register') }}">Regístrate aquí</a>
     </p>
 </div>
 
@@ -266,7 +266,7 @@
         alertDiv.classList.remove('show');
         
         try {
-            const response = await fetch('/proyectoChats/public/api/login', {
+            const response = await fetch('{{ url('api_login') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -274,8 +274,18 @@
                 body: JSON.stringify({ email, password })
             });
             
-            const data = await response.json();
-            
+            let data;
+            try {
+                const text = await response.text();
+                try {
+                    data = text ? JSON.parse(text) : {};
+                } catch (e) {
+                    data = { success: false, message: 'Respuesta no JSON del servidor', status: response.status, body_preview: text.substring(0, 500) };
+                }
+            } catch (e) {
+                data = { success: false, message: 'No se pudo leer la respuesta del servidor: ' + e.message };
+            }
+
             if (data.success) {
                 // Guardar datos de sesión
                 localStorage.setItem('userToken', data.data.user_token);
@@ -285,16 +295,18 @@
                 
                 showAlert('¡Login exitoso! Redirigiendo...', 'success');
                 
-                // Redirigir al home después de 1.5 segundos
+                // Redirigir al home usando la URL que devuelva el servidor si existe
+                const redirectUrl = data?.data?.redirect_url || "{{ url('app_home') }}";
                 setTimeout(() => {
-                    window.location.href = '/proyectoChats/public/home';
+                    window.location.href = redirectUrl;
                 }, 1500);
             } else {
-                showAlert(data.message || 'Error en el login', 'error');
+                console.warn('Login fallo. Status:', response.status, 'Body:', data);
+                showAlert(data.message || ('Error en el login (status ' + response.status + ')'), 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
-            showAlert('Error al conectar con el servidor', 'error');
+            console.error('Error connecting to API:', error);
+            showAlert(error.message || 'Error al conectar con el servidor', 'error');
         } finally {
             submitBtn.disabled = false;
             loadingDiv.style.display = 'none';

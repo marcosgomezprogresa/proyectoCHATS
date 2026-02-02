@@ -537,10 +537,4 @@ class HomeController extends AbstractController
             'endpoints' => $endpoints,
         ]);
     }
-
-    #[Route(path: '/home', name: 'app_home')]
-    public function home(): Response
-    {
-        return $this->render('home.html.twig');
-    }
 }

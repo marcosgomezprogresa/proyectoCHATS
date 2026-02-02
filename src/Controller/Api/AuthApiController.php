@@ -38,18 +38,39 @@ class AuthApiController extends AbstractController
     public function login(
         Request $request,
         UserRepository $userRepository,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        \Psr\Log\LoggerInterface $logger
     ): JsonResponse {
         try {
-            // Decodificar el JSON del request
-            $data = json_decode($request->getContent(), true);
+            // Decodificar el JSON del request o aceptar form-data/urlencoded
+            $content = $request->getContent();
+            $data = json_decode($content, true);
+            if (!is_array($data)) {
+                // Intentar leer como form data (x-www-form-urlencoded o multipart)
+                $data = $request->request->all();
+            }
 
             // Validar que existan los campos requeridos (aceptamos 'usuario' o 'email')
             $email = $data['usuario'] ?? $data['email'] ?? null;
-            if (!$email || !isset($data['password'])) {
+            $password = $data['password'] ?? null;
+            if (!$email || !$password) {
+                // Loguear para depuración
+                $logger->warning('Auth login - missing fields', [
+                    'remote_ip' => $request->getClientIp(),
+                    'content_length' => is_string($content) ? strlen($content) : 0,
+                    'raw_body_preview' => is_string($content) ? substr($content, 0, 1000) : '',
+                    'request_headers' => $request->headers->all(),
+                ]);
+
+                // Para depuración, devolver qué claves se recibieron (sin incluir password)
+                $receivedKeys = array_keys(is_array($data) ? $data : []);
+                $rawBody = $content;
                 return $this->json([
                     'success' => false,
-                    'message' => 'Faltan campos requeridos: usuario|email, password'
+                    'message' => 'Faltan campos requeridos: usuario|email, password',
+                    'received_keys' => $receivedKeys,
+                    'raw_body_length' => is_string($rawBody) ? strlen($rawBody) : 0,
+                    'raw_body_preview' => is_string($rawBody) ? substr($rawBody, 0, 1000) : ''
                 ], 400);
             }
 
@@ -64,8 +85,8 @@ class AuthApiController extends AbstractController
                 ], 401);
             }
 
-            // Login exitoso - devolver token y perfil
-            return $this->json([
+            // Login exitoso - devolver token, perfil y URL de redirección
+            $responseData = [
                 'success' => true,
                 'message' => 'Login exitoso',
                 'data' => [
@@ -74,9 +95,18 @@ class AuthApiController extends AbstractController
                         'email' => $user->getEmail(),
                         'nombre' => $user->getNombre(),
                         'estado' => $user->getEstado()->value
-                    ]
+                    ],
+                    'redirect_url' => $this->generateUrl('app_home')
                 ]
-            ], 200);
+            ];
+
+            // Si el cliente espera HTML (navegador sin JS), redirigimos a la ruta 'home'
+            $accept = $request->headers->get('Accept', '');
+            if (str_contains($accept, 'text/html') && !str_contains($accept, 'application/json')) {
+                return $this->redirectToRoute('app_home');
+            }
+
+            return $this->json($responseData, 200);
 
         } catch (\Exception $e) {
             return $this->json([

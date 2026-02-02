@@ -412,6 +412,12 @@ class UsuarioApiController extends AbstractController
             'estado' => $user->getEstado()->value,
             'avatar_url' => $user->getAvatarUrl(),
             'ultima_actividad' => $user->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z'),
+            // Datos de ubicación y visibilidad
+            'latitud' => $user->getLatitud(),
+            'longitud' => $user->getLongitud(),
+            'compartir_ubicacion' => $user->isCompartirUbicacion(),
+            'activo' => $user->isActivo(),
+            'radio_visibilidad_km' => $user->getRadioVisibilidadKm(),
             'puedo_chatear' => true
         ];
     }

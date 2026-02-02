@@ -16,19 +16,37 @@ class NuevoUsuario extends Fixture
     public function load(ObjectManager $manager): void
     {
         $user = new User();
-        $user->setEmail('user@user.com');
-        $user->setNombre('Usuario Prueba');
-        $user->setRoles(['ROLE_USER']); // rol básico
-        $user->setToken(bin2hex(random_bytes(32)));
+        $usersData = [
+            ['email' => 'user@user.com',   'nombre' => 'Usuario Prueba', 'lat' => 40.4168, 'lng' => -3.7038],
+            ['email' => 'maria@example.com','nombre' => 'María',          'lat' => 40.4200, 'lng' => -3.7020],
+            ['email' => 'carlos@example.com','nombre' => 'Carlos',         'lat' => 40.4120, 'lng' => -3.7100],
+            ['email' => 'laura@example.com', 'nombre' => 'Laura',          'lat' => 40.4180, 'lng' => -3.6950],
+        ];
 
-        $hashedPassword = $this->passwordHasher->hashPassword(
-            $user,
-            '123456'
-        );
+        foreach ($usersData as $uData) {
+            $u = new User();
+            $u->setEmail($uData['email']);
+            $u->setNombre($uData['nombre']);
+            $u->setRoles(['ROLE_USER']); // rol básico
+            $u->setToken(bin2hex(random_bytes(32)));
 
-        $user->setPassword($hashedPassword);
+            // Ubicación y visibilidad
+            $u->setLatitud($uData['lat']);
+            $u->setLongitud($uData['lng']);
+            $u->setCompartirUbicacion(true);
+            $u->setRadioVisibilidadKm(5.0);
+            $u->setActivo(true);
+            $u->setUltimaUbicacion(new \DateTime());
 
-        $manager->persist($user);
+            $hashedPassword = $this->passwordHasher->hashPassword(
+                $u,
+                '123456'
+            );
+
+            $u->setPassword($hashedPassword);
+            $manager->persist($u);
+        }
+
         $manager->flush();
     }
 }

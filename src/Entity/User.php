@@ -49,8 +49,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $longitud = null;
 
+    // Nuevo: fecha en la que se registró la última ubicación geográfica
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $ultimaUbicacion = null;
+
+    // Nuevo: si el usuario está activo (puede recibir notificaciones, aparece en listados)
+    #[ORM\Column(type: 'boolean')]
+    private bool $activo = true;
+
+    // Nuevo: si comparte ubicación en tiempo real (si false no aparece en el mapa)
+    #[ORM\Column(type: 'boolean')]
+    private bool $compartirUbicacion = false;
+
+    // Nuevo: radio (km) en el que quiere ser visible (opcional)
+    #[ORM\Column(type: Types::FLOAT, nullable: true)]
+    private ?float $radioVisibilidadKm = 5.0;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $fechaRegistro = null;
@@ -159,6 +172,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUltimaUbicacion(?\DateTimeInterface $ultimaUbicacion): static
     {
         $this->ultimaUbicacion = $ultimaUbicacion;
+        return $this;
+    }
+
+    public function isActivo(): bool
+    {
+        return $this->activo;
+    }
+
+    public function setActivo(bool $activo): static
+    {
+        $this->activo = $activo;
+        return $this;
+    }
+
+    public function isCompartirUbicacion(): bool
+    {
+        return $this->compartirUbicacion;
+    }
+
+    public function setCompartirUbicacion(bool $compartirUbicacion): static
+    {
+        $this->compartirUbicacion = $compartirUbicacion;
+        return $this;
+    }
+
+    public function getRadioVisibilidadKm(): ?float
+    {
+        return $this->radioVisibilidadKm;
+    }
+
+    public function setRadioVisibilidadKm(?float $radioVisibilidadKm): static
+    {
+        $this->radioVisibilidadKm = $radioVisibilidadKm;
         return $this;
     }
 

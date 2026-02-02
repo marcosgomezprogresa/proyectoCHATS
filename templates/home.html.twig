@@ -4,92 +4,127 @@
 
 {% block body %}
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    
-    .home-container {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        padding: 50px;
-        max-width: 500px;
-        text-align: center;
-    }
-    
-    .home-container h1 {
-        font-size: 32px;
-        color: #333;
-        margin-bottom: 20px;
-    }
-    
-    .home-container p {
-        color: #666;
-        margin-bottom: 30px;
-        line-height: 1.6;
-    }
-    
-    .button-group {
-        display: flex;
-        gap: 15px;
-        flex-direction: column;
-    }
-    
-    .btn {
-        padding: 12px 20px;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-        display: inline-block;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-secondary {
-        background: #f0f0f0;
-        color: #333;
-        border: 2px solid #667eea;
-    }
-    
-    .btn-secondary:hover {
-        background: #667eea;
-        color: white;
-    }
+    body{font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:24px}
+    .layout{display:flex;gap:24px;max-width:1200px;margin:0 auto}
+    .panel{background:#fff;border-radius:8px;padding:18px;box-shadow:0 6px 25px rgba(0,0,0,.08)}
+    .left{flex:1;min-width:320px}
+    .right{flex:2}
+    .chat-item{border:1px solid #eee;padding:12px;border-radius:6px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    .chat-meta{display:flex;flex-direction:column}
+    #map{height:600px;border-radius:8px}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .btn-primary{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none}
+    .muted{color:#666;font-size:13px}
 </style>
 
-<div class="home-container">
-    <h1>🏠 Bienvenido a Chats</h1>
-    <p>
-        Plataforma de mensajería en tiempo real que conecta a personas dentro de un radio geográfico cercano (~5 km).
-    </p>
-    
-    <div class="button-group">
-        <a href="{{ path('app_endpoints') }}" class="btn btn-primary">📚 Ver Endpoints</a>
-        <a href="{{ path('app_login') }}" class="btn btn-secondary">🔐 Volver al Login</a>
+<div class="layout">
+    <div class="left panel">
+        <div class="header">
+            <div>
+                <h2>Chats activos</h2>
+                <div class="muted">Lista de chats actualmente activos</div>
+            </div>
+            <a id="refreshBtn" class="btn-primary">🔄 Refrescar</a>
+        </div>
+        <div id="chatList">
+            <!-- Se rellenará con JS -->
+        </div>
+    </div>
+
+    <div class="right panel">
+        <div class="header">
+            <div>
+                <h2>Mapa de chats</h2>
+                <div class="muted">Ubicación aproximada de cada chat</div>
+            </div>
+        </div>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+              integrity="sha256-sA+e2d3gFvQJz1YI4W+EJ8Oe6sQY+4T9FglT8f+AAro=" crossorigin="" />
+        <div id="map"></div>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-o9N1jGk7tE2CzS4k0VZ0GJpVYj5rS1Qv7qz1k0Xv1w0=" crossorigin=""></script>
     </div>
 </div>
+
+<script>
+    const apiHomeUrl = '{{ url('api_home') }}';
+
+    function getRawToken(){
+        const t = localStorage.getItem('userToken') || '';
+        return t.startsWith('usr_tok_') ? t.replace('usr_tok_','') : t;
+    }
+
+    async function fetchChats(){
+        const token = getRawToken();
+        if(!token){ window.location.href = '{{ url('app_login') }}'; return; }
+
+        try{
+            const res = await fetch(apiHomeUrl, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if(res.status === 401){ window.location.href = '{{ url('app_login') }}'; return; }
+
+            const json = await res.json();
+            if(!json.success){ document.getElementById('chatList').innerHTML = '<div class="muted">'+(json.message||'Error')+'</div>'; return; }
+
+            const chats = json.data.chats_activos || [];
+            renderChatList(chats);
+            renderMap(chats);
+
+        }catch(err){
+            console.error(err);
+            document.getElementById('chatList').innerHTML = '<div class="muted">No se pudo conectar con la API</div>';
+        }
+    }
+
+    function renderChatList(chats){
+        const container = document.getElementById('chatList');
+        container.innerHTML = '';
+        if(!chats.length){ container.innerHTML = '<div class="muted">No hay chats activos</div>'; return; }
+
+        chats.forEach(c=>{
+            const div = document.createElement('div');
+            div.className = 'chat-item';
+            div.innerHTML = `
+                <div class="chat-meta">
+                    <strong>${c.nombre}</strong>
+                    <small class="muted">${c.tipo} • ${c.descripcion || ''}</small>
+                </div>
+                <div class="muted">${c.chat_token}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    let map, markersLayer;
+    function renderMap(chats){
+        if(!map){
+            map = L.map('map').setView([40.4168, -3.7038], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+        }
+
+        markersLayer.clearLayers();
+        const bounds = [];
+        chats.forEach(c=>{
+            if(typeof c.lat === 'number' && typeof c.lng === 'number'){
+                const m = L.marker([c.lat, c.lng]).bindPopup(`<strong>${c.nombre}</strong><br>${c.tipo}`);
+                markersLayer.addLayer(m);
+                bounds.push([c.lat, c.lng]);
+            }
+        });
+
+        if(bounds.length) map.fitBounds(bounds, {padding:[50,50]});
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', fetchChats);
+
+    // Inicializar
+    fetchChats();
+</script>
+
 {% endblock %}

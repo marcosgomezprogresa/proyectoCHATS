@@ -69,7 +69,7 @@ class ChatApiController extends AbstractController
                         'estado' => $user->getEstado()->value
                     ],
                     'chats_activos' => $chatsData,
-                    'usuarios_cercanos' => [],
+                    'usuarios_cercanos' => $this->getUsuariosCercanos($user->getId(), $userRepository),
                     'estadisticas' => [
                         'total_chats' => count($chatsData),
                         'mensajes_no_leidos' => 0
@@ -668,13 +668,65 @@ class ChatApiController extends AbstractController
      */
     private function serializeChat(Chat $chat): array
     {
+        // Generamos coordenadas simuladas para la demo si no existen en la entidad
+        // Base en Madrid (40.4168, -3.7038) y desplazamientos pequeños por id
+        $baseLat = 40.4168;
+        $baseLng = -3.7038;
+        $offset = ($chat->getId() ?? 0) * 0.005; // ~0.005 grados por id
+
+        $lat = $baseLat + $offset;
+        $lng = $baseLng + $offset;
+
         return [
             'chat_token' => 'chat_' . $chat->getId(),
             'nombre' => $chat->getNombre(),
             'tipo' => $chat->getTipo()->value,
             'descripcion' => $chat->getDescripcion(),
             'activo' => $chat->isActivo(),
-            'fecha_creacion' => $chat->getFechaCreacion()?->format('Y-m-d\TH:i:s\Z')
+            'fecha_creacion' => $chat->getFechaCreacion()?->format('Y-m-d\TH:i:s\Z'),
+            'lat' => $lat,
+            'lng' => $lng
         ];
+    }
+
+    /**
+     * Obtiene usuarios cercanos para mostrar en el mapa (filtrados por estado, compartirUbicacion, actividad reciente)
+     */
+    private function getUsuariosCercanos(int $currentUserId, UserRepository $userRepository): array
+    {
+        $cutoff = (new \DateTime())->modify('-15 minutes');
+
+        $qb = $userRepository->createQueryBuilder('u')
+            ->where('u.activo = :activo')
+            ->andWhere('u.compartirUbicacion = :compartir')
+            ->andWhere('u.latitud IS NOT NULL')
+            ->andWhere('u.longitud IS NOT NULL')
+            ->andWhere('u.ultimaActividad >= :cutoff')
+            ->setParameters([
+                'activo' => true,
+                'compartir' => true,
+                'cutoff' => $cutoff
+            ])
+            ->setMaxResults(50);
+
+        $users = $qb->getQuery()->getResult();
+
+        $result = [];
+        foreach ($users as $u) {
+            // Omitir al propio usuario
+            if ($u->getId() === $currentUserId) continue;
+
+            $result[] = [
+                'usuario_id' => $u->getId(),
+                'nombre' => $u->getNombre(),
+                'estado' => $u->getEstado()->value,
+                'lat' => $u->getLatitud(),
+                'lng' => $u->getLongitud(),
+                'avatar_url' => $u->getAvatarUrl(),
+                'ultima_actividad' => $u->getUltimaActividad()?->format('Y-m-d\TH:i:s\Z')
+            ];
+        }
+
+        return $result;
     }
 }

@@ -32,6 +32,8 @@ security:
     access_control:
         - { path: ^/api, roles: PUBLIC_ACCESS }
         - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/endpoints, roles: PUBLIC_ACCESS }
+        - { path: ^/home$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
