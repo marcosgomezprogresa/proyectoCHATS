@@ -37,10 +37,11 @@ class HomeController extends AbstractController
             ],
             [
                 'id' => 2,
-                'nombre' => 'API/Usuarios',
-                'metodo' => 'POST / GET / PATCH / DELETE',
-                'acceso' => 'Token (para operaciones del propio usuario)',
-                'descripcion' => 'Gestiona el perfil de usuario. POST registra, GET obtiene perfil, PATCH actualiza, DELETE elimina.',
+                'nombre' => 'API/Usuarios - Registrar',
+                'metodo' => 'POST',
+                'ruta' => 'POST /api/usuarios',
+                'acceso' => 'Público',
+                'descripcion' => 'Registra un nuevo usuario en el sistema.',
                 'request' => '{
   "email": "nuevo@email.com",
   "password": "clave123",
@@ -57,6 +58,89 @@ class HomeController extends AbstractController
       "estado": "online",
       "fecha_registro": "2024-01-16T14:30:00Z"
     }
+  }
+}',
+            ],
+            [
+                'id' => 2.1,
+                'nombre' => 'API/Usuarios - Mi Perfil',
+                'metodo' => 'GET',
+                'ruta' => 'GET /api/usuarios/perfil',
+                'acceso' => 'Token (usuario autenticado)',
+                'descripcion' => 'Obtiene el perfil completo del usuario autenticado.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Perfil obtenido exitosamente",
+  "data": {
+    "usuario_id": 1,
+    "email": "juan@email.com",
+    "nombre": "Juan",
+    "estado": "online",
+    "avatar_url": "https://...",
+    "fecha_registro": "2024-01-16T14:30:00Z"
+  }
+}',
+            ],
+            [
+                'id' => 2.2,
+                'nombre' => 'API/Usuarios - Ver Perfil Específico',
+                'metodo' => 'GET',
+                'ruta' => 'GET /api/usuarios/{id}',
+                'acceso' => 'Token',
+                'descripcion' => 'Obtiene el perfil público de un usuario específico.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Perfil obtenido exitosamente",
+  "data": {
+    "usuario_id": 5,
+    "email": "carlos@email.com",
+    "nombre": "Carlos",
+    "estado": "online",
+    "avatar_url": "https://...",
+    "ultima_actividad": "2024-01-16T10:58:00Z"
+  }
+}',
+            ],
+            [
+                'id' => 2.3,
+                'nombre' => 'API/Usuarios - Actualizar',
+                'metodo' => 'PATCH',
+                'ruta' => 'PATCH /api/usuarios/{id}',
+                'acceso' => 'Token (solo tu propio usuario)',
+                'descripcion' => 'Actualiza los datos de un usuario. Solo el propietario puede actualizar su propio perfil.',
+                'request' => '{
+  "nombre": "Juan Pérez",
+  "estado": "ausente",
+  "avatar_url": "https://..."
+}',
+                'response' => '{
+  "success": true,
+  "message": "Perfil actualizado exitosamente",
+  "data": {
+    "usuario_id": 1,
+    "email": "juan@email.com",
+    "nombre": "Juan Pérez",
+    "estado": "ausente",
+    "avatar_url": "https://..."
+  }
+}',
+            ],
+            [
+                'id' => 2.4,
+                'nombre' => 'API/Usuarios - Eliminar',
+                'metodo' => 'DELETE',
+                'ruta' => 'DELETE /api/usuarios/{id}',
+                'acceso' => 'Token (solo tu propio usuario)',
+                'descripcion' => 'Elimina/desactiva una cuenta de usuario. Solo el propietario puede eliminar su cuenta.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Usuario eliminado exitosamente",
+  "data": {
+    "usuario_id": 1,
+    "email": "juan@email.com"
   }
 }',
             ],
@@ -263,6 +347,181 @@ class HomeController extends AbstractController
     "user_token_invalidado": "usr_tok_ana789...",
     "timestamp_cierre": "2024-01-16T11:05:00Z",
     "sesiones_restantes": 2
+  }
+}',
+            ],
+            
+            // ============ ENDPOINTS DE ADMINISTRACIÓN ============
+            
+            [
+                'id' => 13,
+                'nombre' => 'API/Admin/Usuarios - Listar',
+                'metodo' => 'GET',
+                'ruta' => 'GET /api/admin/usuarios',
+                'acceso' => 'Token (solo admin)',
+                'descripcion' => 'Lista todos los usuarios del sistema con posibilidad de filtros.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Usuarios obtenidos",
+  "data": {
+    "total": 150,
+    "usuarios": [
+      {
+        "usuario_id": 1,
+        "email": "juan@email.com",
+        "nombre": "Juan",
+        "estado": "online",
+        "fecha_registro": "2024-01-16T14:30:00Z"
+      }
+    ]
+  }
+}',
+            ],
+            [
+                'id' => 14,
+                'nombre' => 'API/Admin/Bloqueos - Ver',
+                'metodo' => 'GET',
+                'ruta' => 'GET /api/admin/usuarios/{id}/bloqueos',
+                'acceso' => 'Token (solo admin)',
+                'descripcion' => 'Obtiene la lista de usuarios bloqueados por un usuario específico.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Bloqueos obtenidos",
+  "data": {
+    "usuario_id": 1,
+    "total_bloqueados": 3,
+    "bloqueados": [
+      {
+        "bloqueado_id": 5,
+        "bloqueado_nombre": "Carlos",
+        "fecha_bloqueo": "2024-01-15T10:00:00Z"
+      }
+    ]
+  }
+}',
+            ],
+            [
+                'id' => 15,
+                'nombre' => 'API/Admin/Bloqueos - Crear',
+                'metodo' => 'POST',
+                'ruta' => 'POST /api/admin/usuarios/{id}/bloquear',
+                'acceso' => 'Token',
+                'descripcion' => 'Bloquea a otro usuario. El usuario bloqueado no podrá contactar ni ver tu perfil.',
+                'request' => '{
+  "usuario_bloqueado_id": 5
+}',
+                'response' => '{
+  "success": true,
+  "message": "Usuario bloqueado exitosamente",
+  "data": {
+    "bloqueador_id": 1,
+    "bloqueado_id": 5,
+    "bloqueado_nombre": "Carlos",
+    "fecha_bloqueo": "2024-01-16T10:00:00Z"
+  }
+}',
+            ],
+            [
+                'id' => 16,
+                'nombre' => 'API/Admin/Bloqueos - Eliminar',
+                'metodo' => 'DELETE',
+                'ruta' => 'DELETE /api/admin/usuarios/{id}/desbloquear/{bloqueado_id}',
+                'acceso' => 'Token',
+                'descripcion' => 'Desbloquea a un usuario previamente bloqueado.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Usuario desbloqueado exitosamente",
+  "data": {
+    "bloqueador_id": 1,
+    "bloqueado_id": 5
+  }
+}',
+            ],
+            [
+                'id' => 17,
+                'nombre' => 'API/Admin/Chats - Listar',
+                'metodo' => 'GET',
+                'ruta' => 'GET /api/admin/chats',
+                'acceso' => 'Token (solo admin)',
+                'descripcion' => 'Lista todos los chats del sistema.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Chats obtenidos",
+  "data": {
+    "total": 45,
+    "chats": [
+      {
+        "chat_id": 1,
+        "nombre": "Chat General",
+        "tipo": "general",
+        "total_miembros": 28,
+        "activo": true
+      }
+    ]
+  }
+}',
+            ],
+            [
+                'id' => 18,
+                'nombre' => 'API/Admin/Chats - Miembros',
+                'metodo' => 'GET',
+                'ruta' => 'GET /api/admin/chats/{id}/miembros',
+                'acceso' => 'Token (solo admin)',
+                'descripcion' => 'Obtiene la lista de miembros de un chat específico.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Miembros obtenidos",
+  "data": {
+    "chat_id": 1,
+    "total_miembros": 28,
+    "miembros": [
+      {
+        "usuario_id": 1,
+        "usuario_nombre": "Juan",
+        "es_admin": true,
+        "fecha_union": "2024-01-16T14:30:00Z"
+      }
+    ]
+  }
+}',
+            ],
+            [
+                'id' => 19,
+                'nombre' => 'API/Admin/Chats - Expulsar Miembro',
+                'metodo' => 'DELETE',
+                'ruta' => 'DELETE /api/admin/chats/{id}/miembros/{usuario_id}',
+                'acceso' => 'Token (admin del chat)',
+                'descripcion' => 'Expulsa a un usuario de un chat específico.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Usuario expulsado del chat",
+  "data": {
+    "chat_id": 1,
+    "usuario_id": 5,
+    "usuario_nombre": "Carlos"
+  }
+}',
+            ],
+            [
+                'id' => 20,
+                'nombre' => 'API/Admin/Chats - Eliminar',
+                'metodo' => 'DELETE',
+                'ruta' => 'DELETE /api/admin/chats/{id}',
+                'acceso' => 'Token (solo admin)',
+                'descripcion' => 'Elimina un chat (inactivación). Solo los administradores del sistema pueden hacerlo.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "message": "Chat eliminado exitosamente",
+  "data": {
+    "chat_id": 1,
+    "chat_nombre": "Chat General"
   }
 }',
             ],

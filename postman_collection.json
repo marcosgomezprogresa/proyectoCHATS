@@ -1,0 +1,609 @@
+{
+  "info": {
+    "name": "API Chats - Proyecto",
+    "description": "Colección de endpoints para la API de chats",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Registrar Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@example.com\",\n  \"password\": \"password123\",\n  \"nombre\": \"Juan\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/proyectoChats/public/api/usuarios",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["proyectoChats", "public", "api", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario\": \"juan@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/logout",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios (CRUD)",
+      "item": [
+        {
+          "name": "Mi Perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/usuarios/perfil",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "usuarios", "perfil"]
+            }
+          }
+        },
+        {
+          "name": "Ver Perfil de Usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/usuarios/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Mi Perfil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"estado\": \"online\",\n  \"avatar_url\": \"https://example.com/avatar.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/usuarios/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Mi Cuenta",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/usuarios/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "usuarios", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chats",
+      "item": [
+        {
+          "name": "Home",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/home",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "home"]
+            }
+          }
+        },
+        {
+          "name": "Chat General - Obtener",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/general",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "general"]
+            }
+          }
+        },
+        {
+          "name": "Chat General - Enviar Mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mensaje\": \"Hola a todos!\",\n  \"tipo\": \"texto\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/general",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "general"]
+            }
+          }
+        },
+        {
+          "name": "Chat Privado - Crear",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_token_destino\": \"usr_tok_abc123def456...\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/privado",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "privado"]
+            }
+          }
+        },
+        {
+          "name": "Privado - Salir",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chat_token\": \"chat_priv_123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/privado/salir",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "privado", "salir"]
+            }
+          }
+        },
+        {
+          "name": "Cambiar Chat Activo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nuevo_chat_token\": \"chat_priv_456\",\n  \"accion\": \"activar\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/privado/cambiar-chat",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "privado", "cambiar-chat"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mensajes",
+      "item": [
+        {
+          "name": "Enviar Mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chat_token\": \"chat_priv_123\",\n  \"mensaje\": \"Hola, ¿cómo estás?\",\n  \"tipo\": \"texto\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/mensaje",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "mensaje"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Perfil",
+      "item": [
+        {
+          "name": "Obtener Perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/perfil",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "perfil"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Perfil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Nueva\",\n  \"estado\": \"ocupado\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/perfil",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "perfil"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Actualizar/Polling",
+      "item": [
+        {
+          "name": "Obtener Novedades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/actualizar",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "actualizar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invitaciones",
+      "item": [
+        {
+          "name": "Invitar a Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_token_invitado\": \"usr_tok_xyz...\",\n  \"chat_token_grupo\": \"chat_grupo_1\",\n  \"mensaje_invitacion\": \"Únete a nuestro grupo\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/invitar",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "invitar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Administración",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ADMIN_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/usuarios",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Ver Bloqueos de Usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/usuarios/1/bloqueos",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "usuarios", "1", "bloqueos"]
+            }
+          }
+        },
+        {
+          "name": "Bloquear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usuario_bloqueado_id\": 5\n}"
+            },
+            "url": {
+              "raw": "http://localhost/api/admin/usuarios/1/bloquear",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "usuarios", "1", "bloquear"]
+            }
+          }
+        },
+        {
+          "name": "Desbloquear Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/usuarios/1/desbloquear/5",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "usuarios", "1", "desbloquear", "5"]
+            }
+          }
+        },
+        {
+          "name": "Listar Chats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ADMIN_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/chats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "chats"]
+            }
+          }
+        },
+        {
+          "name": "Ver Miembros del Chat",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/chats/1/miembros",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "chats", "1", "miembros"]
+            }
+          }
+        },
+        {
+          "name": "Expulsar Miembro del Chat",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/chats/1/miembros/5",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "chats", "1", "miembros", "5"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Chat",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ADMIN_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost/api/admin/chats/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "path": ["api", "admin", "chats", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "TOKEN",
+      "value": "",
+      "description": "Token de usuario autenticado (sin prefijo usr_tok_)"
+    },
+    {
+      "key": "ADMIN_TOKEN",
+      "value": "",
+      "description": "Token de usuario administrador"
+    }
+  ]
+}

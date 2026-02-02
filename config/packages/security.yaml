@@ -13,6 +13,10 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        api:
+            pattern: ^/api
+            security: false
+
         main:
             lazy: true
             provider: app_user_provider
@@ -26,6 +30,7 @@ security:
                 path: app_logout
 
     access_control:
+        - { path: ^/api, roles: PUBLIC_ACCESS }
         - { path: ^/login$, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
