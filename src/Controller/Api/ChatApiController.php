@@ -5,10 +5,12 @@ namespace App\Controller\Api;
 use App\Entity\Chat;
 use App\Entity\UsuarioChat;
 use App\Entity\Mensaje;
+use App\Entity\Invitacion;
 use App\Enum\TipoChat;
 use App\Enum\EstadoUsuario;
 use App\Enum\TipoMensaje;
 use App\Enum\EstadoMensaje;
+use App\Enum\EstadoInvitacion;
 use App\Repository\ChatRepository;
 use App\Repository\UsuarioChatRepository;
 use App\Repository\UserRepository;
@@ -552,7 +554,9 @@ class ChatApiController extends AbstractController
     #[Route('/mensaje', name: 'send_message', methods: ['POST'])]
     public function sendMessage(
         Request $request,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        ChatRepository $chatRepository,
+        EntityManagerInterface $em
     ): JsonResponse {
         try {
             $user = $this->getAuthenticatedUser($request, $userRepository);
@@ -572,16 +576,39 @@ class ChatApiController extends AbstractController
                 ], 400);
             }
 
+            // Buscar el chat por token (formato: chat_{id})
+            $chatId = str_replace('chat_', '', $data['chat_token']);
+            $chat = $chatRepository->find((int)$chatId);
+            
+            if (!$chat) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Chat no encontrado'
+                ], 404);
+            }
+
+            // Crear y guardar el mensaje
+            $mensaje = new Mensaje();
+            $mensaje->setRemitente($user);
+            $mensaje->setChat($chat);
+            $mensaje->setContenido($data['mensaje']);
+            $mensaje->setTipo(TipoMensaje::TEXTO);
+            $mensaje->setEstado(EstadoMensaje::ENTREGADO);
+            $mensaje->setFechaHora(new \DateTime());
+
+            $em->persist($mensaje);
+            $em->flush();
+
             return $this->json([
                 'success' => true,
                 'data' => [
-                    'mensaje_token' => 'msg_' . uniqid(),
+                    'mensaje_token' => 'msg_' . $mensaje->getId(),
                     'chat_token' => $data['chat_token'],
                     'nombre_usuario' => $user->getNombre(),
-                    'mensaje' => $data['mensaje'],
-                    'fecha_hora' => (new \DateTime())->format('Y-m-d\TH:i:s\Z'),
-                    'tipo' => $data['tipo'] ?? 'texto',
-                    'estado' => 'entregado'
+                    'mensaje' => $mensaje->getContenido(),
+                    'fecha_hora' => $mensaje->getFechaHora()?->format('Y-m-d\TH:i:s\Z'),
+                    'tipo' => $mensaje->getTipo()->value,
+                    'estado' => $mensaje->getEstado()->value
                 ]
             ], 201);
 
@@ -607,7 +634,9 @@ class ChatApiController extends AbstractController
     #[Route('/invitar', name: 'invite_user', methods: ['POST'])]
     public function inviteUser(
         Request $request,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        ChatRepository $chatRepository,
+        EntityManagerInterface $em
     ): JsonResponse {
         try {
             $user = $this->getAuthenticatedUser($request, $userRepository);
@@ -627,15 +656,48 @@ class ChatApiController extends AbstractController
                 ], 400);
             }
 
+            // Buscar usuario invitado por token (formato: usr_tok_{hash})
+            $usuarioInvitado = $userRepository->findOneBy(['token' => $data['user_token_invitado']]);
+            if (!$usuarioInvitado) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Usuario invitado no encontrado'
+                ], 404);
+            }
+
+            // Buscar chat por token (formato: chat_{id})
+            $chatId = str_replace('chat_', '', $data['chat_token_grupo']);
+            $chat = $chatRepository->find((int)$chatId);
+            
+            if (!$chat) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Chat no encontrado'
+                ], 404);
+            }
+
+            // Crear y guardar la invitación
+            $invitacion = new Invitacion();
+            $invitacion->setInvitador($user);
+            $invitacion->setInvitado($usuarioInvitado);
+            $invitacion->setChat($chat);
+            $invitacion->setEstado(EstadoInvitacion::PENDIENTE);
+            $invitacion->setMensaje($data['mensaje'] ?? 'Te he invitado a un chat');
+            $invitacion->setFechaEnvio(new \DateTime());
+            $invitacion->setFechaExpiracion(new \DateTime('+7 days'));
+
+            $em->persist($invitacion);
+            $em->flush();
+
             return $this->json([
                 'success' => true,
                 'message' => 'Invitación enviada',
                 'data' => [
-                    'invitacion_token' => 'inv_' . uniqid(),
+                    'invitacion_token' => 'inv_' . $invitacion->getId(),
                     'chat_token' => $data['chat_token_grupo'],
-                    'estado_invitacion' => 'pendiente',
-                    'fecha_envio' => (new \DateTime())->format('Y-m-d\TH:i:s\Z'),
-                    'expiracion' => (new \DateTime('+7 days'))->format('Y-m-d\TH:i:s\Z')
+                    'estado_invitacion' => $invitacion->getEstado()->value,
+                    'fecha_envio' => $invitacion->getFechaEnvio()?->format('Y-m-d\TH:i:s\Z'),
+                    'expiracion' => $invitacion->getFechaExpiracion()?->format('Y-m-d\TH:i:s\Z')
                 ]
             ], 201);
 
