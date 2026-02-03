@@ -3,13 +3,27 @@
 # Post-deploy script for Railway
 # Executed after the container is deployed
 
-echo "Running Symfony cache clear..."
-php bin/console cache:clear --env=prod
+set -e
 
-echo "Running database migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction --env=prod || true
+echo "=== Starting Post-Deploy Script ==="
+echo "Current directory: $(pwd)"
+echo "PHP version: $(php -v)"
 
-echo "Installing assets..."
-php bin/console assets:install --env=prod
+echo ""
+echo "=== Running Symfony cache clear... ==="
+php bin/console cache:clear --env=prod || echo "⚠️  Cache clear failed, continuing..."
 
-echo "Post-deploy completed!"
+echo ""
+echo "=== Creating database if not exists... ==="
+php bin/console doctrine:database:create --if-not-exists --env=prod || echo "⚠️  Database creation failed"
+
+echo ""
+echo "=== Running database migrations... ==="
+php bin/console doctrine:migrations:migrate --no-interaction --env=prod || echo "⚠️  Migrations failed"
+
+echo ""
+echo "=== Installing assets... ==="
+php bin/console assets:install --env=prod || echo "⚠️  Assets install failed"
+
+echo ""
+echo "✅ Post-deploy script completed!"

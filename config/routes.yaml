@@ -1,6 +1,6 @@
 root:
     path: /
-    controller: App\Controller\SecurityController::login
+    controller: App\Controller\HomeController::index
 
 controllers:
     resource:
