@@ -68,6 +68,9 @@
             "@auto-scripts"
         ]
     },
+    "scripts-descriptions": {
+        "auto-scripts": "Execute Symfony cache clear and assets install"
+    },
     "conflict": {
         "symfony/symfony": "*"
     },
