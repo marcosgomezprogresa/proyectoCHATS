@@ -181,9 +181,9 @@ class ChatApiController extends AbstractController
             $mensajes = array_map(function ($msg) {
                 return [
                     'mensaje_token' => 'msg_' . $msg->getId(),
-                    'user_token' => 'usr_tok_' . $msg->getUsuario()->getToken(),
-                    'nombre_usuario' => $msg->getUsuario()->getNombre(),
-                    'avatar_url' => $msg->getUsuario()->getAvatarUrl() ?? '',
+                    'user_token' => 'usr_tok_' . $msg->getRemitente()->getToken(),
+                    'nombre_usuario' => $msg->getRemitente()->getNombre(),
+                    'avatar_url' => $msg->getRemitente()->getAvatarUrl() ?? '',
                     'mensaje' => $msg->getContenido(),
                     'fecha_hora' => $msg->getFechaHora()?->format('Y-m-d\TH:i:s\Z'),
                     'tipo' => $msg->getTipo()->value
