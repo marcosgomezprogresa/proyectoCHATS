@@ -4,8 +4,11 @@ namespace App\Controller\Api;
 
 use App\Entity\Chat;
 use App\Entity\UsuarioChat;
+use App\Entity\Mensaje;
 use App\Enum\TipoChat;
 use App\Enum\EstadoUsuario;
+use App\Enum\TipoMensaje;
+use App\Enum\EstadoMensaje;
 use App\Repository\ChatRepository;
 use App\Repository\UsuarioChatRepository;
 use App\Repository\UserRepository;
@@ -257,16 +260,28 @@ class ChatApiController extends AbstractController
                 ], 404);
             }
 
+            // Crear y guardar el mensaje
+            $mensaje = new Mensaje();
+            $mensaje->setRemitente($user);
+            $mensaje->setChat($chat);
+            $mensaje->setContenido($data['mensaje']);
+            $mensaje->setTipo(TipoMensaje::TEXTO);
+            $mensaje->setEstado(EstadoMensaje::ENTREGADO);
+            $mensaje->setFechaHora(new \DateTime());
+
+            $em->persist($mensaje);
+            $em->flush();
+
             return $this->json([
                 'success' => true,
                 'data' => [
-                    'mensaje_token' => 'msg_' . uniqid(),
+                    'mensaje_token' => 'msg_' . $mensaje->getId(),
                     'chat_token' => 'chat_general_1',
                     'nombre_usuario' => $user->getNombre(),
-                    'mensaje' => $data['mensaje'],
-                    'fecha_hora' => (new \DateTime())->format('Y-m-d\TH:i:s\Z'),
-                    'tipo' => $data['tipo'] ?? 'texto',
-                    'estado' => 'entregado'
+                    'mensaje' => $mensaje->getContenido(),
+                    'fecha_hora' => $mensaje->getFechaHora()?->format('Y-m-d\TH:i:s\Z'),
+                    'tipo' => $mensaje->getTipo()->value,
+                    'estado' => $mensaje->getEstado()->value
                 ]
             ], 201);
 
