@@ -215,34 +215,67 @@ Sin datos en el cuerpo de la solicitud',
                 'metodo' => 'GET / POST',
                 'ruta' => 'GET /api/general?page=1&limit=20 / POST /api/general',
                 'acceso' => 'Token',
-                'descripcion' => 'Gestiona el chat grupal público de la zona (~5 km). GET obtiene el historial con paginación, POST envía un mensaje nuevo.',
-                'request' => 'GET: Headers:
-Authorization: Bearer <token>
+                'descripcion' => 'Gestiona el chat grupal público. GET obtiene el historial con paginación, POST envía un mensaje nuevo al chat general.',
+                'request' => 'GET: 
+Método: GET
+URL: http://localhost/proyectoChats/public/api/general?page=1&limit=20
+Headers:
+  Authorization: Bearer <token>
 
-POST: {
-  "mensaje": "¿Alguien quiere charlar?",
-  "tipo": "texto"
+POST:
+Método: POST
+URL: http://localhost/proyectoChats/public/api/general
+Headers:
+  Authorization: Bearer <token>
+  Content-Type: application/json
+Body:
+{
+  "mensaje": "Hola a todos en el chat general"
 }',
-                'response' => '{
+                'response' => 'GET Response (200):
+{
   "success": true,
   "data": {
+    "chat_token": "chat_27",
+    "nombre": "General",
+    "tipo": "general",
+    "descripcion": "Chat general para todos",
+    "activo": true,
+    "fecha_creacion": "2026-02-02T19:16:16Z",
+    "lat": 40.5518,
+    "lng": -3.5688,
+    "cantidad_usuarios": 4,
     "mensajes": [
       {
-        "mensaje_token": "msg_789",
-        "chat_token": "chat_general_1",
-        "nombre_usuario": "Ana",
-        "mensaje": "¿Alguien quiere charlar?",
-        "fecha_hora": "2026-02-02T19:00:00Z",
-        "tipo": "texto",
-        "estado": "entregado"
+        "mensaje_token": "msg_1",
+        "user_token": "usr_tok_30e3bbd2add6daf7a66b0b536b01efa99c9d42e3681035e78e66ac09f5dce84d",
+        "nombre_usuario": "Administrador",
+        "avatar_url": "",
+        "mensaje": "Hola a todos en el chat general",
+        "fecha_hora": "2026-02-03T13:04:11Z",
+        "tipo": "texto"
       }
     ],
     "paginacion": {
-      "total_mensajes": 150,
+      "total_mensajes": 1,
       "pagina_actual": 1,
       "mensajes_por_pagina": 20,
-      "tiene_mas": true
+      "tiene_mas": false
     }
+  }
+}
+
+POST Response (201):
+{
+  "success": true,
+  "data": {
+    "mensaje_token": "msg_1",
+    "chat_token": "chat_general_1",
+    "nombre_usuario": "Administrador",
+    "mensaje": "Hola a todos en el chat general",
+    "fecha_hora": "2026-02-03T13:04:11Z",
+    "tipo": "texto",
+    "estado": "entregado"
   }
 }',
             ],
