@@ -2,6 +2,16 @@
 
 Aplicación de chat geolocalizado desarrollada en Symfony 7.2 con soporte para chats privados, chat general y geolocalización de usuarios basada en proximidad.
 
+## 🌐 Versión en Línea
+
+**Aplicación desplegada:** https://proyectochats-production.up.railway.app
+
+**Usuario de prueba:**
+- Email: `admin@chat.com`
+- Contraseña: `admin123`
+
+**Documentación de API:** https://proyectochats-production.up.railway.app/endpoints
+
 ## 📋 Características
 
 - **Autenticación JWT**: Sistema seguro de tokens JWT
