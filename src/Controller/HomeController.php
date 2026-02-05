@@ -608,6 +608,7 @@ Sin datos en el cuerpo de la solicitud',
                 'nombre' => 'API/Admin/Chats - Miembros',
                 'metodo' => 'GET',
                 'necesita_body' => false,
+                'params' => ['id'],
                 'ruta' => 'GET /api/admin/chats/{id}/miembros',
                 'acceso' => 'Token (solo admin)',
                 'descripcion' => 'Obtiene la lista de miembros de un chat específico.',
@@ -617,21 +618,8 @@ Sin datos en el cuerpo de la solicitud',
   "message": "Miembros obtenidos",
   "data": {
     "chat_id": 1,
-    "total_miembros": 2,
-    "miembros": [
-      {
-        "usuario_id": 9,
-        "usuario_nombre": "Juaaaaaan Pérez",
-        "es_admin": false,
-        "fecha_union": "2026-02-05T15:00:00Z"
-      },
-      {
-        "usuario_id": 10,
-        "usuario_nombre": "ususario2",
-        "es_admin": false,
-        "fecha_union": "2026-02-05T15:05:00Z"
-      }
-    ]
+    "total_miembros": 0,
+    "miembros": []
   }
 }',
             ],
