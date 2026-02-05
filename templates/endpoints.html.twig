@@ -557,7 +557,7 @@ Content-Type: application/json</div>
                 
                 <div class="form-group">
                     <label>📤 Body (JSON)</label>
-                    <textarea class="body-input-{{ endpoint.id }}" placeholder="{{ endpoint.request|replace({'\n': '&#10;', '"': '&quot;'}) }}"></textarea>
+                    <textarea class="body-input-{{ endpoint.id }}" data-example="{{ endpoint.request|escape('html_attr') }}"></textarea>
                 </div>
                 
                 <div class="tester-buttons">
@@ -582,6 +582,15 @@ Content-Type: application/json</div>
 <script>
     function showDetails(endpointId) {
         document.getElementById('modal' + endpointId).classList.add('active');
+        
+        // Poblar el textarea con el ejemplo cuando se abre el modal
+        const textarea = document.querySelector('.body-input-' + endpointId);
+        if (textarea && !textarea.value) {
+            const example = textarea.getAttribute('data-example');
+            if (example) {
+                textarea.value = example;
+            }
+        }
     }
     
     function closeModal(endpointId) {
