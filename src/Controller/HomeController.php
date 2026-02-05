@@ -341,9 +341,9 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => true,
                 'ruta' => 'POST /api/invitar',
                 'acceso' => 'Token',
-                'descripcion' => 'Invita a otro usuario a unirse a un chat grupal (función futura para grupos temáticos).',
+                'descripcion' => 'Invita a otro usuario a unirse a un chat grupal.',
                 'request' => '{
-  "user_id_invitado": 10,
+  "user_token_invitado": "36552b16fecba5cbef9dbbeae6cca0778dd932134e7cd89aaee37c6bc861cdd4",
   "chat_token_grupo": "chat_1",
   "mensaje_invitacion": "¡Únete a nuestro grupo!"
 }',
@@ -351,11 +351,11 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Invitación enviada",
   "data": {
-    "invitacion_token": "inv_abc123",
+    "invitacion_token": "inv_1",
     "chat_token": "chat_1",
     "estado_invitacion": "pendiente",
-    "fecha_envio": "2026-02-05T17:45:00Z",
-    "expiracion": "2026-02-12T17:45:00Z"
+    "fecha_envio": "2026-02-05T17:47:51Z",
+    "expiracion": "2026-02-12T17:47:51Z"
   }
 }',
             ],
