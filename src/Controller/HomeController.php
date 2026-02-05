@@ -29,21 +29,21 @@ class HomeController extends AbstractController
                 'nombre' => 'API/Login',
                 'metodo' => 'POST',
                 'necesita_body' => true,
-                'acceso' => 'Público (con API-KEY)',
-                'descripcion' => 'Verifica usuario y contraseña. Devuelve el token JWT y datos del perfil.',
+                'acceso' => 'Público',
+                'descripcion' => 'Autentica un usuario y devuelve su token JWT. Usa las credenciales de tu cuenta registrada.',
                 'request' => '{
-  "email": "admin@chat.com",
-  "password": "admin123"
+  "email": "miusuario@ejemplo.com",
+  "password": "password123"
 }',
                 'response' => '{
   "success": true,
   "message": "Login exitoso",
   "data": {
-    "user_token": "usr_tok_eyJhbGciOiJIUzI1NiIs...",
+    "user_token": "usr_tok_58e61eefbeca42c8d513a2f12bc20dfbf0dccdedb8e95756a875263b1d172f4d",
     "user_profile": {
-      "email": "admin@chat.com",
-      "nombre": "Administrador",
-      "estado": "online"
+      "email": "miusuario@ejemplo.com",
+      "nombre": "Mi Usuario",
+      "estado": "offline"
     }
   }
 }',
