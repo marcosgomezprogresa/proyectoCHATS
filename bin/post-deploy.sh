@@ -19,7 +19,13 @@ php bin/console doctrine:database:create --if-not-exists --env=prod || echo "⚠
 
 echo ""
 echo "=== Running database migrations... ==="
-php bin/console doctrine:migrations:migrate --no-interaction --env=prod || echo "⚠️  Migrations failed"
+php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+MIGRATION_EXIT=$?
+if [ $MIGRATION_EXIT -ne 0 ]; then
+    echo "⚠️  Migrations exited with code $MIGRATION_EXIT"
+else
+    echo "✅ Migrations completed successfully"
+fi
 
 echo ""
 echo "=== Installing assets... ==="
