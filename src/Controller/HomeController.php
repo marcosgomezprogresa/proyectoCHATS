@@ -563,6 +563,7 @@ Sin datos en el cuerpo de la solicitud',
                 'nombre' => 'API/Admin/Bloqueos - Eliminar',
                 'metodo' => 'DELETE',
                 'necesita_body' => false,
+                'params' => ['id', 'bloqueado_id'],
                 'ruta' => 'DELETE /api/admin/usuarios/{id}/desbloquear/{bloqueado_id}',
                 'acceso' => 'Token',
                 'descripcion' => 'Desbloquea a un usuario previamente bloqueado.',
@@ -571,8 +572,8 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Usuario desbloqueado exitosamente",
   "data": {
-    "bloqueador_id": 9,
-    "bloqueado_id": 10
+    "bloqueador_id": 11,
+    "bloqueado_id": 9
   }
 }',
             ],
