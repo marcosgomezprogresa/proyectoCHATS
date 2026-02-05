@@ -361,26 +361,42 @@ Sin datos en el cuerpo de la solicitud',
             ],
             [
                 'id' => 10,
-                'nombre' => 'API/Perfil',
-                'metodo' => 'GET / PATCH',
-                'necesita_body' => true,
+                'nombre' => 'API/Perfil - Obtener',
+                'metodo' => 'GET',
+                'necesita_body' => false,
+                'ruta' => 'GET /api/perfil',
                 'acceso' => 'Token',
-                'descripcion' => 'Obtiene o actualiza la información pública del perfil del usuario (nombre, foto, estado).',
-                'request' => '{
-  "nombre": "AnaNueva",
-  "estado": "ausente",
-  "preferencias": {
-    "notificaciones": true
+                'descripcion' => 'Obtiene la información del perfil del usuario actual.',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
+                'response' => '{
+  "success": true,
+  "data": {
+    "usuario_id": 9,
+    "email": "miusuario@ejemplo.com",
+    "nombre": "Juaaaaaan Pérez",
+    "estado": "offline",
+    "ultima_actividad": "2026-02-05T17:21:05Z"
   }
+}',
+            ],
+            [
+                'id' => '10_1',
+                'nombre' => 'API/Perfil - Actualizar',
+                'metodo' => 'PATCH',
+                'necesita_body' => true,
+                'ruta' => 'PATCH /api/perfil',
+                'acceso' => 'Token',
+                'descripcion' => 'Actualiza la información del perfil del usuario actual.',
+                'request' => '{
+  "nombre": "Nuevo Nombre",
+  "estado": "online"
 }',
                 'response' => '{
   "success": true,
   "data": {
-    "user_token": "usr_tok_carlos123...",
-    "nombre": "Carlos",
-    "estado": "online",
-    "ultima_actividad": "2024-01-16T10:58:00Z",
-    "puedo_chatear": true
+    "usuario_id": 9,
+    "nombre": "Nuevo Nombre",
+    "estado": "online"
   }
 }',
             ],
