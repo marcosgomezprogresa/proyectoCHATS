@@ -551,22 +551,22 @@ Content-Type: application/json</div>
                 {% if 'Token' in endpoint.acceso %}
                 <div class="form-group">
                     <label>🔑 Token JWT (obtenido en login)</label>
-                    <input type="text" class="token-input-{{ endpoint.id }}" placeholder="Ej: eyJhbGciOiJIUzI1NiIs..." />
+                    <input type="text" data-endpoint-id="{{ endpoint.id }}" data-type="token" placeholder="Ej: eyJhbGciOiJIUzI1NiIs..." />
                 </div>
                 {% endif %}
                 
                 {% if endpoint.necesita_body %}
                 <div class="form-group">
                     <label>📤 Body (JSON)</label>
-                    <textarea class="body-input-{{ endpoint.id }}" data-example="{{ endpoint.request|escape('html_attr') }}"></textarea>
+                    <textarea data-endpoint-id="{{ endpoint.id }}" data-type="body" data-example="{{ endpoint.request|escape('html_attr') }}"></textarea>
                 </div>
                 {% endif %}
                 
                 <div class="tester-buttons">
-                    <button class="btn-test" onclick="testEndpoint({{ endpoint.id }}, '{{ endpoint.metodo }}', '{{ endpoint.nombre }}')">
+                    <button class="btn-test" onclick="testEndpoint('{{ endpoint.id }}', '{{ endpoint.metodo }}', '{{ endpoint.nombre }}')">
                         ▶ Enviar Solicitud
                     </button>
-                    <button class="btn-clear" onclick="clearTester({{ endpoint.id }})">
+                    <button class="btn-clear" onclick="clearTester('{{ endpoint.id }}')">
                         🗑️ Limpiar
                     </button>
                 </div>
@@ -585,8 +585,8 @@ Content-Type: application/json</div>
     function showDetails(endpointId) {
         document.getElementById('modal' + endpointId).classList.add('active');
         
-        // Poblar el textarea con el ejemplo cuando se abre el modal
-        const textareas = document.querySelectorAll('[class*="body-input-"]');
+        // Poblar los textareas con los ejemplos cuando se abre el modal
+        const textareas = document.querySelectorAll('textarea[data-type="body"]');
         textareas.forEach(textarea => {
             const example = textarea.getAttribute('data-example');
             if (example && !textarea.value) {
@@ -656,8 +656,8 @@ Content-Type: application/json</div>
     
     async function testEndpoint(endpointId, method, name) {
         const url = endpointUrls[endpointId];
-        const bodyInput = document.querySelector('[class*="body-input-' + endpointId + '"]');
-        const tokenInput = document.querySelector('.token-input-' + endpointId);
+        const bodyInput = document.querySelector('textarea[data-endpoint-id="' + endpointId + '"][data-type="body"]');
+        const tokenInput = document.querySelector('input[data-endpoint-id="' + endpointId + '"][data-type="token"]');
         const responseDiv = document.getElementById('response-' + endpointId);
         const statusDiv = document.getElementById('status-' + endpointId);
         const bodyDiv = document.getElementById('body-' + endpointId);
@@ -737,8 +737,8 @@ Content-Type: application/json</div>
     }
     
     function clearTester(endpointId) {
-        const bodyInput = document.querySelector('[class*="body-input-' + endpointId + '"]');
-        const tokenInput = document.querySelector('.token-input-' + endpointId);
+        const bodyInput = document.querySelector('textarea[data-endpoint-id="' + endpointId + '"][data-type="body"]');
+        const tokenInput = document.querySelector('input[data-endpoint-id="' + endpointId + '"][data-type="token"]');
         const responseDiv = document.getElementById('response-' + endpointId);
         
         if (bodyInput) bodyInput.value = '';
