@@ -180,7 +180,14 @@ class AuthApiController extends AbstractController
             return null;
         }
         
-        // Extraer y devolver el token (sin "Bearer ")
-        return substr($authHeader, 7);
+        // Extraer el token (sin "Bearer ")
+        $token = substr($authHeader, 7);
+        
+        // Si el token tiene el prefijo usr_tok_, quitarlo
+        if (str_starts_with($token, 'usr_tok_')) {
+            $token = substr($token, 8); // Remove "usr_tok_"
+        }
+        
+        return $token;
     }
 }
