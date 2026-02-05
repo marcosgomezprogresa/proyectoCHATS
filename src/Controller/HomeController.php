@@ -482,13 +482,20 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Usuarios obtenidos",
   "data": {
-    "total": 3,
+    "total": 11,
     "usuarios": [
+      {
+        "usuario_id": 1,
+        "email": "test@test.com",
+        "nombre": "test",
+        "estado": "offline",
+        "fecha_registro": "2026-02-05T10:29:59Z"
+      },
       {
         "usuario_id": 9,
         "email": "miusuario@ejemplo.com",
-        "nombre": "Juaaaaaan Pérez",
-        "estado": "offline",
+        "nombre": "Nuevo Nombre",
+        "estado": "online",
         "fecha_registro": "2026-02-05T14:24:17Z"
       },
       {
@@ -496,7 +503,7 @@ Sin datos en el cuerpo de la solicitud',
         "email": "usuario2@ejemplo.com",
         "nombre": "ususario2",
         "estado": "offline",
-        "fecha_registro": "2026-02-05T14:24:30Z"
+        "fecha_registro": "2026-02-05T16:59:45Z"
       },
       {
         "usuario_id": 11,
