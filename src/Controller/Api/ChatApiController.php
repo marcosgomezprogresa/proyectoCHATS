@@ -764,6 +764,7 @@ class ChatApiController extends AbstractController
 
     /**
      * Extrae el token del header Authorization
+     * Formato esperado: "Bearer <token>" o "Bearer usr_tok_<token>"
      */
     private function extractTokenFromHeader(Request $request): ?string
     {
@@ -771,7 +772,12 @@ class ChatApiController extends AbstractController
         if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
             return null;
         }
-        return substr($authHeader, 7);
+        $token = substr($authHeader, 7);
+        // Remover el prefijo "usr_tok_" si está presente
+        if (str_starts_with($token, 'usr_tok_')) {
+            $token = substr($token, 8);
+        }
+        return $token;
     }
 
     /**
