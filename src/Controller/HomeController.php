@@ -137,22 +137,23 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => true,
                 'params' => ['id'],
                 'ruta' => 'PATCH /api/usuarios/{id}',
+                'url_completa_ejemplo' => 'PATCH /api/usuarios/9',
+                'parametros_ejemplo' => 'id = 9 (ID del usuario a actualizar)',
                 'acceso' => 'Token (solo tu propio usuario)',
                 'descripcion' => 'Actualiza los datos de un usuario. Solo el propietario puede actualizar su propio perfil.',
                 'request' => '{
-  "nombre": "Juan Pérez",
-  "estado": "ausente",
-  "avatar_url": "https://..."
+  "nombre": "Juaaaaaan Pérez"
 }',
                 'response' => '{
   "success": true,
   "message": "Perfil actualizado exitosamente",
   "data": {
-    "usuario_id": 1,
-    "email": "juan@email.com",
-    "nombre": "Juan Pérez",
-    "estado": "ausente",
-    "avatar_url": "https://..."
+    "usuario_id": 9,
+    "email": "miusuario@ejemplo.com",
+    "nombre": "Juaaaaaan Pérez",
+    "estado": "offline",
+    "avatar_url": null,
+    "fecha_registro": "2026-02-05T14:24:17Z"
   }
 }',
             ],
