@@ -472,7 +472,7 @@
     
     <div class="endpoints-grid" id="endpointsContainer">
         {% for endpoint in endpoints %}
-        <div class="endpoint-card" onclick="showDetails({{ endpoint.id }})">
+        <div class="endpoint-card" onclick="showDetails('{{ endpoint.id }}')">
             <div class="endpoint-number">{{ endpoint.id }}</div>
             <div class="endpoint-name">{{ endpoint.nombre }}</div>
             <span class="endpoint-method method-{% if '/' in endpoint.metodo %}mixed{% else %}{{ endpoint.metodo|lower }}{% endif %}">
