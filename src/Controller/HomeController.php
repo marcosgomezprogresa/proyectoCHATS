@@ -242,44 +242,22 @@ Sin datos en el cuerpo de la solicitud',
                 'ruta' => 'POST /api/privado',
                 'acceso' => 'Token',
                 'descripcion' => 'Crea o accede a un chat privado con otro usuario. Se valida que ambos usuarios estén dentro de 5km. Devuelve error si está fuera de rango o el usuario está bloqueado.',
-                'request' => 'Headers:
-Authorization: Bearer <token>
-
-Body:
-{
-  "user_id_destino": 38
+                'request' => '{
+  "user_id_destino": 10
 }',
                 'response' => '{
-  "success": true,
-  "data": {
-    "chat_token": "chat_priv_26",
-    "tipo": "privado",
-    "with_user": {
-      "id": 38,
-      "user_token": "usr_tok_c2fd62e7153a589ed49ddc79b3f5a6e00084aff7cd59c0961e5d70ef9511d408",
-      "nombre": "Moderador",
-      "estado": "online",
-      "distancia_km": 0.87,
-      "ultima_actividad": "2026-02-02T19:00:00Z"
-    },
-    "historial": [],
-    "created": true,
-    "timestamp": "2026-02-02T19:05:00Z"
+  "success": false,
+  "error": {
+    "code": "OUT_OF_RANGE",
+    "message": "El usuario está fuera de tu radio de 5km",
+    "details": {
+      "distancia_km": 999,
+      "max_distancia_km": 5
+    }
   }
 }
 
-Errores posibles:
-{
-  "success": false,
-  "error_code": "OUT_OF_RANGE",
-  "message": "El usuario está fuera del rango de 5km"
-}
-
-{
-  "success": false,
-  "error_code": "USER_NOT_FOUND",
-  "message": "Usuario no encontrado"
-}',
+Nota: Para que este endpoint funcione, ambos usuarios deben estar dentro de 5km de distancia (con geolocalización configurada).',
             ],
             [
                 'id' => 6,
