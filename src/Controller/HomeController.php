@@ -590,20 +590,13 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Chats obtenidos",
   "data": {
-    "total": 2,
+    "total": 1,
     "chats": [
       {
         "chat_id": 1,
-        "nombre": null,
+        "nombre": "Chat Privado - ususario2",
         "tipo": "privado",
-        "total_miembros": 2,
-        "activo": true
-      },
-      {
-        "chat_id": 2,
-        "nombre": "Chat General",
-        "tipo": "general",
-        "total_miembros": 3,
+        "total_miembros": 0,
         "activo": true
       }
     ]
