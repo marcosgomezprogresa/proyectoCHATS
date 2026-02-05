@@ -248,7 +248,7 @@ Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "data": {
-    "chat_token": "chat_priv_1",
+    "chat_token": "chat_1",
     "tipo": "privado",
     "with_user": {
       "id": 10,
@@ -272,23 +272,19 @@ Sin datos en el cuerpo de la solicitud',
                 'ruta' => 'POST /api/mensaje',
                 'acceso' => 'Token',
                 'descripcion' => 'Envía un mensaje a un chat (ya sea privado o general). Requiere el chat_token y el contenido del mensaje.',
-                'request' => 'Headers:
-Authorization: Bearer <token>
-
-Body:
-{
-  "chat_token": "chat_priv_26",
+                'request' => '{
+  "chat_token": "chat_1",
   "mensaje": "Hola, ¿cómo estás?",
   "tipo": "texto"
 }',
                 'response' => '{
   "success": true,
   "data": {
-    "mensaje_token": "msg_789",
-    "chat_token": "chat_priv_26",
-    "nombre_usuario": "Administrador",
+    "mensaje_token": "msg_1",
+    "chat_token": "chat_1",
+    "nombre_usuario": "Juaaaaaan Pérez",
     "mensaje": "Hola, ¿cómo estás?",
-    "fecha_hora": "2026-02-02T19:05:00Z",
+    "fecha_hora": "2026-02-05T17:14:29Z",
     "tipo": "texto",
     "estado": "entregado"
   }
