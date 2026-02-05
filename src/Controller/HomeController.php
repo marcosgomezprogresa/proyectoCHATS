@@ -184,45 +184,21 @@ Sin datos en el cuerpo de la solicitud',
                 'ruta' => 'GET /api/home',
                 'acceso' => 'Token',
                 'descripcion' => 'Punto de entrada principal tras el login. Devuelve datos resumen: usuario, lista de chats activos con último mensaje, usuarios cercanos (dentro de 5km) con distancias en km.',
-                'request' => 'Headers:
-Authorization: Bearer <token>
-Content-Type: application/json
-
-Sin datos en el cuerpo de la solicitud',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "data": {
     "usuario_actual": {
-      "usuario_id": 37,
-      "email": "admin@chat.com",
-      "nombre": "Administrador",
-      "estado": "online"
+      "id": 9,
+      "nombre": "Juaaaaaan Pérez",
+      "estado": "offline"
     },
-    "chats_activos": [
-      {
-        "chat_token": "chat_priv_20",
-        "tipo": "privado",
-        "with_user": {
-          "id": 38,
-          "nombre": "Moderador",
-          "estado": "online"
-        },
-        "ultimo_mensaje": "Hola",
-        "ultimo_mensaje_time": "2026-02-02T19:00:00Z",
-        "mensajes_no_leidos": 0
-      }
-    ],
-    "usuarios_cercanos": [
-      {
-        "id": 38,
-        "nombre": "Moderador",
-        "estado": "online",
-        "distancia_km": 0.87,
-        "ultima_actividad": "2026-02-02T19:00:00Z"
-      }
-    ],
+    "chats_activos": [],
+    "usuarios_cercanos": [],
     "estadisticas": {
-      "usuarios_online_cerca": 1,
+      "total_chats": 0,
+      "mensajes_no_leidos": 0,
+      "usuarios_online_cerca": 0,
       "radio_km": 5
     }
   }
