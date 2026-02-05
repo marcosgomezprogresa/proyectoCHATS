@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+echo "Installing PHP extensions..."
+docker-php-ext-install pdo pdo_mysql
+
+echo "Installing Composer dependencies..."
+composer install --no-interaction --optimize-autoloader
+
+echo "Build completed successfully!"
