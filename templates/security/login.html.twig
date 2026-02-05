@@ -17,6 +17,237 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+    
+    .login-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        padding: 40px;
+        position: relative;
+    }
+    
+    .endpoints-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s;
+    }
+    
+    .endpoints-btn:hover {
+        background: #764ba2;
+        text-decoration: none;
+        color: white;
+    }
+    
+    .login-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .alert {
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .alert-danger {
+        background: #fee;
+        color: #c33;
+        border: 1px solid #fcc;
+    }
+    
+    .auth-info {
+        background: #eef;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #555;
+    }
+</style>
+
+<div class="login-container">
+    <a href="{{ path('app_endpoints') }}" class="endpoints-btn">📚 Ver Endpoints</a>
+    
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    {% if app.user %}
+        <div class="auth-info">
+            Estás conectado como <strong>{{ app.user.userIdentifier }}</strong> 
+            <a href="{{ logout_path() }}" style="color: #667eea;">Cerrar sesión</a>
+        </div>
+    {% endif %}
+
+    <h1 class="login-title">🔐 Chats</h1>
+    
+    <div id="alert" class="alert" style="display: none;"></div>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input 
+                type="email" 
+                name="email" 
+                id="email" 
+                placeholder="tu@email.com"
+                required 
+                autofocus
+            >
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input 
+                type="password" 
+                name="password" 
+                id="password" 
+                placeholder="••••••••"
+                required
+            >
+        </div>
+        
+        <button class="submit-btn" type="submit" id="submitBtn">
+            Iniciar Sesión
+        </button>
+    </form>
+</div>
+
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const alertDiv = document.getElementById('alert');
+    
+    // Restaurar email si existe en localStorage
+    window.addEventListener('load', () => {
+        const savedEmail = localStorage.getItem('lastEmail');
+        if (savedEmail) {
+            emailInput.value = savedEmail;
+        }
+    });
+    
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        
+        // Validaciones
+        if (!email || !password) {
+            showAlert('Por favor completa todos los campos', 'danger');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Guardar datos de sesión
+                localStorage.setItem('userToken', data.data.user_token);
+                localStorage.setItem('userName', data.data.user_profile.nombre);
+                localStorage.setItem('userEmail', data.data.user_profile.email);
+                localStorage.setItem('lastEmail', email);
+                
+                showAlert('¡Login exitoso! Redirigiendo...', 'success');
+                
+                // Redirigir al home después de 1.5 segundos
+                setTimeout(() => {
+                    window.location.href = "{{ path('app_home') }}";
+                }, 1500);
+            } else {
+                showAlert(data.message || 'Error en el login', 'danger');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error al conectar con el servidor', 'danger');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+    
+    function showAlert(message, type) {
+        alertDiv.textContent = message;
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.style.display = 'block';
+        alertDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+</script>
+{% endblock %}
+        justify-content: center;
+        align-items: center;
         padding: 20px;
     }
     
