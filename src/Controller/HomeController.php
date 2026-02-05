@@ -460,8 +460,9 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Sesión cerrada correctamente",
   "data": {
-    "user_token_invalidado": "usr_tok_xxx",
-    "timestamp_cierre": "2026-02-05T17:50:00Z"
+    "user_token_invalidado": "usr_tok_36552b16fecba5cbef9dbbeae6cca0778dd932134e7cd89aaee37c6bc861cdd4",
+    "timestamp_cierre": "2026-02-05T18:16:44Z",
+    "sesiones_restantes": 0
   }
 }',
             ],
