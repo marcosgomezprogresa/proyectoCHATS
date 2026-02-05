@@ -317,19 +317,20 @@ Sin datos en el cuerpo de la solicitud',
                 'nombre' => 'API/Privado/CambiarChat',
                 'metodo' => 'POST',
                 'necesita_body' => true,
+                'ruta' => 'POST /api/privado/cambiar-chat',
                 'acceso' => 'Token',
                 'descripcion' => 'Cambia el chat activo actual en el cliente. Es una señal para el servidor sobre a qué chat enviar notificaciones en tiempo real.',
                 'request' => '{
-  "nuevo_chat_token": "chat_priv_16",
+  "nuevo_chat_token": "chat_1",
   "accion": "activar"
 }',
                 'response' => '{
   "success": true,
   "message": "Chat activo cambiado",
   "data": {
-    "chat_token": "chat_priv_16",
+    "chat_token": "chat_1",
     "accion_realizada": "activado",
-    "timestamp": "2024-01-16T10:45:00Z"
+    "timestamp": "2026-02-05T17:21:05Z"
   }
 }',
             ],
