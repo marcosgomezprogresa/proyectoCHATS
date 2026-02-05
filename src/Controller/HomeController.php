@@ -638,6 +638,7 @@ Sin datos en el cuerpo de la solicitud',
   "success": false,
   "message": "No tienes permisos para expulsar miembros"
 }',
+                'parametros_ejemplo' => 'id: 1 (chat a expulsar de), usuario_id: 10 (usuario a expulsar). Solo funciona si eres admin del chat.',
             ],
             [
                 'id' => 20,
