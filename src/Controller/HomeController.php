@@ -241,23 +241,28 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => true,
                 'ruta' => 'POST /api/privado',
                 'acceso' => 'Token',
-                'descripcion' => 'Crea o accede a un chat privado con otro usuario. Se valida que ambos usuarios estén dentro de 5km. Devuelve error si está fuera de rango o el usuario está bloqueado.',
+                'descripcion' => 'Crea o accede a un chat privado con otro usuario.',
                 'request' => '{
   "user_id_destino": 10
 }',
                 'response' => '{
-  "success": false,
-  "error": {
-    "code": "OUT_OF_RANGE",
-    "message": "El usuario está fuera de tu radio de 5km",
-    "details": {
-      "distancia_km": 999,
-      "max_distancia_km": 5
-    }
+  "success": true,
+  "data": {
+    "chat_token": "chat_priv_1",
+    "tipo": "privado",
+    "with_user": {
+      "id": 10,
+      "user_token": "usr_tok_36552b16fecba5cbef9dbbeae6cca0778dd932134e7cd89aaee37c6bc861cdd4",
+      "nombre": "ususario2",
+      "estado": "offline",
+      "distancia_km": 0,
+      "ultima_actividad": "2026-02-05T16:59:45Z"
+    },
+    "historial": [],
+    "created": true,
+    "timestamp": "2026-02-05T17:09:49Z"
   }
-}
-
-Nota: Para que este endpoint funcione, ambos usuarios deben estar dentro de 5km de distancia (con geolocalización configurada).',
+}',
             ],
             [
                 'id' => 6,
