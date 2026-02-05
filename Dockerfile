@@ -2,7 +2,7 @@ FROM php:8.3-fpm
 
 # Instalar extensiones necesarias
 RUN apt-get update && apt-get install -y \
-    libmysqlclient-dev \
+    libmariadb-dev \
     && docker-php-ext-install pdo pdo_mysql \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
