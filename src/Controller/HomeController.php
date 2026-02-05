@@ -476,20 +476,34 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => false,
                 'ruta' => 'GET /api/admin/usuarios',
                 'acceso' => 'Token (solo admin)',
-                'descripcion' => 'Lista todos los usuarios del sistema con posibilidad de filtros.',
+                'descripcion' => 'Lista todos los usuarios del sistema.',
                 'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "message": "Usuarios obtenidos",
   "data": {
-    "total": 150,
+    "total": 3,
     "usuarios": [
       {
-        "usuario_id": 1,
-        "email": "juan@email.com",
-        "nombre": "Juan",
-        "estado": "online",
-        "fecha_registro": "2024-01-16T14:30:00Z"
+        "usuario_id": 9,
+        "email": "miusuario@ejemplo.com",
+        "nombre": "Juaaaaaan Pérez",
+        "estado": "offline",
+        "fecha_registro": "2026-02-05T14:24:17Z"
+      },
+      {
+        "usuario_id": 10,
+        "email": "usuario2@ejemplo.com",
+        "nombre": "ususario2",
+        "estado": "offline",
+        "fecha_registro": "2026-02-05T14:24:30Z"
+      },
+      {
+        "usuario_id": 11,
+        "email": "admin@chat.com",
+        "nombre": "Marcos Admin",
+        "estado": "offline",
+        "fecha_registro": "2026-02-05T18:22:51Z"
       }
     ]
   }
@@ -508,15 +522,9 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Bloqueos obtenidos",
   "data": {
-    "usuario_id": 1,
-    "total_bloqueados": 3,
-    "bloqueados": [
-      {
-        "bloqueado_id": 5,
-        "bloqueado_nombre": "Carlos",
-        "fecha_bloqueo": "2024-01-15T10:00:00Z"
-      }
-    ]
+    "usuario_id": 9,
+    "total_bloqueados": 0,
+    "bloqueados": []
   }
 }',
             ],
@@ -529,16 +537,16 @@ Sin datos en el cuerpo de la solicitud',
                 'acceso' => 'Token',
                 'descripcion' => 'Bloquea a otro usuario. El usuario bloqueado no podrá contactar ni ver tu perfil.',
                 'request' => '{
-  "usuario_bloqueado_id": 5
+  "usuario_bloqueado_id": 10
 }',
                 'response' => '{
   "success": true,
   "message": "Usuario bloqueado exitosamente",
   "data": {
-    "bloqueador_id": 1,
-    "bloqueado_id": 5,
-    "bloqueado_nombre": "Carlos",
-    "fecha_bloqueo": "2024-01-16T10:00:00Z"
+    "bloqueador_id": 9,
+    "bloqueado_id": 10,
+    "bloqueado_nombre": "ususario2",
+    "fecha_bloqueo": "2026-02-05T18:30:00Z"
   }
 }',
             ],
@@ -555,8 +563,8 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Usuario desbloqueado exitosamente",
   "data": {
-    "bloqueador_id": 1,
-    "bloqueado_id": 5
+    "bloqueador_id": 9,
+    "bloqueado_id": 10
   }
 }',
             ],
@@ -573,13 +581,20 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Chats obtenidos",
   "data": {
-    "total": 45,
+    "total": 2,
     "chats": [
       {
         "chat_id": 1,
+        "nombre": null,
+        "tipo": "privado",
+        "total_miembros": 2,
+        "activo": true
+      },
+      {
+        "chat_id": 2,
         "nombre": "Chat General",
         "tipo": "general",
-        "total_miembros": 28,
+        "total_miembros": 3,
         "activo": true
       }
     ]
@@ -600,13 +615,19 @@ Sin datos en el cuerpo de la solicitud',
   "message": "Miembros obtenidos",
   "data": {
     "chat_id": 1,
-    "total_miembros": 28,
+    "total_miembros": 2,
     "miembros": [
       {
-        "usuario_id": 1,
-        "usuario_nombre": "Juan",
-        "es_admin": true,
-        "fecha_union": "2024-01-16T14:30:00Z"
+        "usuario_id": 9,
+        "usuario_nombre": "Juaaaaaan Pérez",
+        "es_admin": false,
+        "fecha_union": "2026-02-05T15:00:00Z"
+      },
+      {
+        "usuario_id": 10,
+        "usuario_nombre": "ususario2",
+        "es_admin": false,
+        "fecha_union": "2026-02-05T15:05:00Z"
       }
     ]
   }
@@ -626,8 +647,8 @@ Sin datos en el cuerpo de la solicitud',
   "message": "Usuario expulsado del chat",
   "data": {
     "chat_id": 1,
-    "usuario_id": 5,
-    "usuario_nombre": "Carlos"
+    "usuario_id": 10,
+    "usuario_nombre": "ususario2"
   }
 }',
             ],
@@ -645,7 +666,7 @@ Sin datos en el cuerpo de la solicitud',
   "message": "Chat eliminado exitosamente",
   "data": {
     "chat_id": 1,
-    "chat_nombre": "Chat General"
+    "chat_nombre": null
   }
 }',
             ],
