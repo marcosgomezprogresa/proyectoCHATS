@@ -31,8 +31,8 @@ class HomeController extends AbstractController
                 'acceso' => 'Público (con API-KEY)',
                 'descripcion' => 'Verifica usuario y contraseña. Devuelve el token JWT y datos del perfil.',
                 'request' => '{
-  "usuario": "ana@email.com",
-  "password": "claveSegura123"
+  "email": "admin@chat.com",
+  "password": "admin123"
 }',
                 'response' => '{
   "success": true,
@@ -40,8 +40,8 @@ class HomeController extends AbstractController
   "data": {
     "user_token": "usr_tok_eyJhbGciOiJIUzI1NiIs...",
     "user_profile": {
-      "email": "ana@email.com",
-      "nombre": "Ana",
+      "email": "admin@chat.com",
+      "nombre": "Administrador",
       "estado": "online"
     }
   }
@@ -55,9 +55,9 @@ class HomeController extends AbstractController
                 'acceso' => 'Público',
                 'descripcion' => 'Registra un nuevo usuario en el sistema.',
                 'request' => '{
-  "email": "nuevo@email.com",
-  "password": "clave123",
-  "nombre": "Juan"
+  "nombre": "Tu Nombre",
+  "email": "tuemial@ejemplo.com",
+  "password": "password123"
 }',
                 'response' => '{
   "success": true,
@@ -65,10 +65,10 @@ class HomeController extends AbstractController
   "data": {
     "user_token": "usr_tok_abc123def456...",
     "usuario": {
-      "email": "nuevo@email.com",
-      "nombre": "Juan",
-      "estado": "online",
-      "fecha_registro": "2024-01-16T14:30:00Z"
+      "email": "tuemial@ejemplo.com",
+      "nombre": "Tu Nombre",
+      "estado": "offline",
+      "fecha_registro": "2026-02-05T13:30:57Z"
     }
   }
 }',
