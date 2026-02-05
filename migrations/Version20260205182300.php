@@ -16,13 +16,13 @@ final class Version20260205182300 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // Find the admin user and grant ROLE_ADMIN role
-        $this->addSql("UPDATE user SET roles = JSON_ARRAY('ROLE_ADMIN', 'ROLE_USER') WHERE email = 'admin@chat.com'");
+        // Find the admin user and grant ROLE_ADMIN role - store as JSON array
+        $this->addSql("UPDATE user SET roles = '[\"ROLE_ADMIN\",\"ROLE_USER\"]' WHERE email = 'admin@chat.com'");
     }
 
     public function down(Schema $schema): void
     {
         // Revert to ROLE_USER only
-        $this->addSql("UPDATE user SET roles = JSON_ARRAY('ROLE_USER') WHERE email = 'admin@chat.com'");
+        $this->addSql("UPDATE user SET roles = '[\"ROLE_USER\"]' WHERE email = 'admin@chat.com'");
     }
 }
