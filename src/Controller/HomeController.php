@@ -295,18 +295,19 @@ Sin datos en el cuerpo de la solicitud',
                 'nombre' => 'API/Privado/Salir',
                 'metodo' => 'POST',
                 'necesita_body' => true,
+                'ruta' => 'POST /api/privado/salir',
                 'acceso' => 'Token',
                 'descripcion' => 'Abandona/archiva un chat privado específico. No elimina el historial, pero lo quita de tu lista activa.',
                 'request' => '{
-  "chat_token": "chat_priv_15"
+  "chat_token": "chat_1"
 }',
                 'response' => '{
   "success": true,
   "message": "Has abandonado el chat",
   "data": {
-    "chat_token": "chat_priv_15",
+    "chat_token": "chat_1",
     "accion": "abandonado",
-    "fecha_salida": "2024-01-16T10:40:00Z",
+    "fecha_salida": "2026-02-05T17:21:05Z",
     "puede_volver": true
   }
 }',
