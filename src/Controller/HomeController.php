@@ -424,17 +424,16 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => true,
                 'ruta' => 'POST /api/actualizar',
                 'acceso' => 'Token',
-                'descripcion' => 'Envía actualizaciones de estado del cliente al servidor (ubicación, estado, etc).',
+                'descripcion' => 'Envía actualizaciones de estado del cliente al servidor (ubicación, estado, etc). Retorna las novedades disponibles.',
                 'request' => '{
   "estado": "online",
   "ultima_actividad": "2026-02-05T17:50:00Z"
 }',
                 'response' => '{
   "success": true,
-  "message": "Estado actualizado",
   "data": {
-    "estado": "online",
-    "timestamp": "2026-02-05T17:50:00Z"
+    "nuevos_mensajes": [],
+    "usuarios_estado": []
   }
 }',
             ],
