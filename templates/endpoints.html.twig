@@ -555,6 +555,17 @@ Content-Type: application/json</div>
                 </div>
                 {% endif %}
                 
+                {% set ruta_params = endpoint.ruta|regex_replace('/\\{([^}]+)\\}/g', '$1')|split(' ') %}
+                {% for param in ruta_params %}
+                    {% if '{' in param and '}' in param %}
+                        {% set param_name = param|regex_replace('/[{}]/g', '') %}
+                    <div class="form-group">
+                        <label>🔗 Parámetro: {{ param_name }}</label>
+                        <input type="text" data-endpoint-id="{{ endpoint.id }}" data-type="param" data-param="{{ param_name }}" placeholder="Ingresa {{ param_name }}" />
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                
                 {% if endpoint.necesita_body %}
                 <div class="form-group">
                     <label>📤 Body (JSON)</label>
@@ -655,7 +666,7 @@ Content-Type: application/json</div>
     };
     
     async function testEndpoint(endpointId, method, name) {
-        const url = endpointUrls[endpointId];
+        let url = endpointUrls[endpointId];
         const bodyInput = document.querySelector('textarea[data-endpoint-id="' + endpointId + '"][data-type="body"]');
         const tokenInput = document.querySelector('input[data-endpoint-id="' + endpointId + '"][data-type="token"]');
         const responseDiv = document.getElementById('response-' + endpointId);
@@ -664,6 +675,24 @@ Content-Type: application/json</div>
         
         if (!url) {
             statusDiv.textContent = '❌ Error: URL no configurada para este endpoint';
+            statusDiv.className = 'response-status error';
+            responseDiv.classList.add('show');
+            return;
+        }
+        
+        // Reemplazar parámetros dinámicos en la URL {id}, {usuario_id}, etc.
+        const paramInputs = document.querySelectorAll('input[data-endpoint-id="' + endpointId + '"][data-type="param"]');
+        paramInputs.forEach(input => {
+            const paramName = input.getAttribute('data-param');
+            const paramValue = input.value.trim();
+            if (paramValue) {
+                url = url.replace('{' + paramName + '}', paramValue);
+            }
+        });
+        
+        // Verificar si quedan parámetros sin reemplazar
+        if (/{.*?}/.test(url)) {
+            statusDiv.innerHTML = '❌ Error: Faltan parámetros en la URL';
             statusDiv.className = 'response-status error';
             responseDiv.classList.add('show');
             return;
@@ -739,10 +768,12 @@ Content-Type: application/json</div>
     function clearTester(endpointId) {
         const bodyInput = document.querySelector('textarea[data-endpoint-id="' + endpointId + '"][data-type="body"]');
         const tokenInput = document.querySelector('input[data-endpoint-id="' + endpointId + '"][data-type="token"]');
+        const paramInputs = document.querySelectorAll('input[data-endpoint-id="' + endpointId + '"][data-type="param"]');
         const responseDiv = document.getElementById('response-' + endpointId);
         
         if (bodyInput) bodyInput.value = '';
         if (tokenInput) tokenInput.value = '';
+        paramInputs.forEach(input => input.value = '');
         responseDiv.classList.remove('show');
     }
 </script>
