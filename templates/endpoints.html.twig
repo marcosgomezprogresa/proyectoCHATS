@@ -555,10 +555,12 @@ Content-Type: application/json</div>
                 </div>
                 {% endif %}
                 
+                {% if endpoint.necesita_body %}
                 <div class="form-group">
                     <label>📤 Body (JSON)</label>
                     <textarea class="body-input-{{ endpoint.id }}" data-example="{{ endpoint.request|escape('html_attr') }}"></textarea>
                 </div>
+                {% endif %}
                 
                 <div class="tester-buttons">
                     <button class="btn-test" onclick="testEndpoint({{ endpoint.id }}, '{{ endpoint.metodo }}', '{{ endpoint.nombre }}')">
@@ -584,13 +586,13 @@ Content-Type: application/json</div>
         document.getElementById('modal' + endpointId).classList.add('active');
         
         // Poblar el textarea con el ejemplo cuando se abre el modal
-        const textarea = document.querySelector('.body-input-' + endpointId);
-        if (textarea && !textarea.value) {
+        const textareas = document.querySelectorAll('[class*="body-input-"]');
+        textareas.forEach(textarea => {
             const example = textarea.getAttribute('data-example');
-            if (example) {
+            if (example && !textarea.value) {
                 textarea.value = example;
             }
-        }
+        });
     }
     
     function closeModal(endpointId) {
@@ -654,7 +656,7 @@ Content-Type: application/json</div>
     
     async function testEndpoint(endpointId, method, name) {
         const url = endpointUrls[endpointId];
-        const bodyInput = document.querySelector('.body-input-' + endpointId);
+        const bodyInput = document.querySelector('[class*="body-input-' + endpointId + '"]');
         const tokenInput = document.querySelector('.token-input-' + endpointId);
         const responseDiv = document.getElementById('response-' + endpointId);
         const statusDiv = document.getElementById('status-' + endpointId);
@@ -735,7 +737,7 @@ Content-Type: application/json</div>
     }
     
     function clearTester(endpointId) {
-        const bodyInput = document.querySelector('.body-input-' + endpointId);
+        const bodyInput = document.querySelector('[class*="body-input-' + endpointId + '"]');
         const tokenInput = document.querySelector('.token-input-' + endpointId);
         const responseDiv = document.getElementById('response-' + endpointId);
         
