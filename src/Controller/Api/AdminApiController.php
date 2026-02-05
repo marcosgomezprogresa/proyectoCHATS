@@ -30,6 +30,28 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/admin', name: 'api_admin_')]
 class AdminApiController extends AbstractController
 {
+    // ============ DEBUG ============
+    #[Route('/debug/make-admin/{email}', name: 'debug_make_admin', methods: ['POST'])]
+    public function debugMakeAdmin(
+        string $email,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $user = $userRepository->findOneBy(['email' => $email]);
+        if (!$user) {
+            return $this->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+        $user->setRoles(['ROLE_ADMIN', 'ROLE_USER']);
+        $entityManager->persist($user);
+        $entityManager->flush();
+        return $this->json([
+            'success' => true,
+            'message' => 'User is now admin',
+            'roles' => $user->getRoles(),
+            'email' => $user->getEmail()
+        ], 200);
+    }
+    
     // ============ USUARIOS - LISTAR ============
     
     /**
