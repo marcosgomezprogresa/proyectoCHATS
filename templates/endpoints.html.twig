@@ -555,16 +555,14 @@ Content-Type: application/json</div>
                 </div>
                 {% endif %}
                 
-                {% set ruta_params = endpoint.ruta|regex_replace('/\\{([^}]+)\\}/g', '$1')|split(' ') %}
-                {% for param in ruta_params %}
-                    {% if '{' in param and '}' in param %}
-                        {% set param_name = param|regex_replace('/[{}]/g', '') %}
+                {% if endpoint.params is defined and endpoint.params %}
+                    {% for param in endpoint.params %}
                     <div class="form-group">
-                        <label>🔗 Parámetro: {{ param_name }}</label>
-                        <input type="text" data-endpoint-id="{{ endpoint.id }}" data-type="param" data-param="{{ param_name }}" placeholder="Ingresa {{ param_name }}" />
+                        <label>🔗 Parámetro: <strong>{{ param }}</strong></label>
+                        <input type="text" data-endpoint-id="{{ endpoint.id }}" data-type="param" data-param="{{ param }}" placeholder="Ingresa {{ param }}" />
                     </div>
-                    {% endif %}
-                {% endfor %}
+                    {% endfor %}
+                {% endif %}
                 
                 {% if endpoint.necesita_body %}
                 <div class="form-group">
