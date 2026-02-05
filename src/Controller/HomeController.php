@@ -370,12 +370,18 @@ Sin datos en el cuerpo de la solicitud',
                 'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
+  "message": "Perfil obtenido exitosamente",
   "data": {
     "usuario_id": 9,
     "email": "miusuario@ejemplo.com",
     "nombre": "Juaaaaaan Pérez",
     "estado": "offline",
-    "ultima_actividad": "2026-02-05T17:21:05Z"
+    "avatar_url": null,
+    "fecha_registro": "2026-02-05T14:24:17Z",
+    "estadisticas": {
+      "chats_activos": 0,
+      "mensajes_totales": 1
+    }
   }
 }',
             ],
@@ -393,10 +399,14 @@ Sin datos en el cuerpo de la solicitud',
 }',
                 'response' => '{
   "success": true,
+  "message": "Perfil actualizado exitosamente",
   "data": {
     "usuario_id": 9,
+    "email": "miusuario@ejemplo.com",
     "nombre": "Nuevo Nombre",
-    "estado": "online"
+    "estado": "online",
+    "avatar_url": null,
+    "fecha_registro": "2026-02-05T14:24:17Z"
   }
 }',
             ],
