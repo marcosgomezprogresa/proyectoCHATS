@@ -402,17 +402,39 @@ Sin datos en el cuerpo de la solicitud',
             ],
             [
                 'id' => 11,
-                'nombre' => 'API/Actualizar',
-                'metodo' => 'GET / POST',
-                'necesita_body' => true,
+                'nombre' => 'API/Actualizar - Consultar',
+                'metodo' => 'GET',
+                'necesita_body' => false,
+                'ruta' => 'GET /api/actualizar',
                 'acceso' => 'Token',
                 'descripcion' => 'Endpoint crítico. Consulta si hay novedades (mensajes nuevos, usuarios que se conectaron/desconectaron) desde la última vez. Se usa para polling o como parte de un sistema de notificaciones en tiempo real.',
                 'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "data": {
-    "nuevos_mensajes": [...],
-    "usuarios_estado": [...]
+    "nuevos_mensajes": [],
+    "usuarios_estado": []
+  }
+}',
+            ],
+            [
+                'id' => '11_1',
+                'nombre' => 'API/Actualizar - Enviar',
+                'metodo' => 'POST',
+                'necesita_body' => true,
+                'ruta' => 'POST /api/actualizar',
+                'acceso' => 'Token',
+                'descripcion' => 'Envía actualizaciones de estado del cliente al servidor (ubicación, estado, etc).',
+                'request' => '{
+  "estado": "online",
+  "ultima_actividad": "2026-02-05T17:50:00Z"
+}',
+                'response' => '{
+  "success": true,
+  "message": "Estado actualizado",
+  "data": {
+    "estado": "online",
+    "timestamp": "2026-02-05T17:50:00Z"
   }
 }',
             ],
@@ -420,19 +442,17 @@ Sin datos en el cuerpo de la solicitud',
                 'id' => 12,
                 'nombre' => 'API/Logout',
                 'metodo' => 'POST',
-                'necesita_body' => true,
+                'necesita_body' => false,
+                'ruta' => 'POST /api/logout',
                 'acceso' => 'Token',
                 'descripcion' => 'Invalida el token del usuario, cerrando la sesión en el servidor.',
-                'request' => '{
-  "cerrar_todas_sesiones": false
-}',
+                'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "message": "Sesión cerrada correctamente",
   "data": {
-    "user_token_invalidado": "usr_tok_ana789...",
-    "timestamp_cierre": "2024-01-16T11:05:00Z",
-    "sesiones_restantes": 2
+    "user_token_invalidado": "usr_tok_xxx",
+    "timestamp_cierre": "2026-02-05T17:50:00Z"
   }
 }',
             ],
