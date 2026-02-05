@@ -297,6 +297,164 @@
             padding: 20px;
         }
     }
+    
+    /* ===== ESTILOS PARA PROBADOR DE ENDPOINTS ===== */
+    .tester-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #ddd;
+        background: #fafafa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .tester-section h3 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .tester-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        color: #333;
+        font-size: 13px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .tester-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .btn-test {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s;
+        flex: 1;
+    }
+    
+    .btn-test:hover {
+        background: #764ba2;
+    }
+    
+    .btn-test:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .btn-clear {
+        padding: 10px 20px;
+        background: #f0f0f0;
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+    
+    .btn-clear:hover {
+        background: #e0e0e0;
+    }
+    
+    .tester-response {
+        margin-top: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 5px;
+        border-left: 4px solid #667eea;
+        display: none;
+    }
+    
+    .tester-response.show {
+        display: block;
+    }
+    
+    .response-status {
+        font-weight: 600;
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+    
+    .response-status.success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-left: 3px solid #2e7d32;
+    }
+    
+    .response-status.error {
+        background: #ffebee;
+        color: #c62828;
+        border-left: 3px solid #c62828;
+    }
+    
+    .response-body {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 11px;
+        overflow-x: auto;
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        color: #333;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin-right: 8px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
 </style>
 
 <div class="container">
@@ -384,6 +542,39 @@
 Authorization: Bearer &lt;token_jwt&gt;
 Content-Type: application/json</div>
         </div>
+        
+        <!-- PROBADOR DE ENDPOINTS -->
+        <div class="tester-section">
+            <h3>🧪 Probar Endpoint</h3>
+            
+            <div class="tester-form">
+                {% if 'Token' in endpoint.acceso %}
+                <div class="form-group">
+                    <label>🔑 Token JWT (obtenido en login)</label>
+                    <input type="text" class="token-input-{{ endpoint.id }}" placeholder="Ej: eyJhbGciOiJIUzI1NiIs..." />
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label>📤 Body (JSON)</label>
+                    <textarea class="body-input-{{ endpoint.id }}" placeholder="Ej: {&#10;  &quot;email&quot;: &quot;test@example.com&quot;,&#10;  &quot;password&quot;: &quot;password123&quot;&#10;}"></textarea>
+                </div>
+                
+                <div class="tester-buttons">
+                    <button class="btn-test" onclick="testEndpoint({{ endpoint.id }}, '{{ endpoint.metodo }}', '{{ endpoint.nombre }}')">
+                        ▶ Enviar Solicitud
+                    </button>
+                    <button class="btn-clear" onclick="clearTester({{ endpoint.id }})">
+                        🗑️ Limpiar
+                    </button>
+                </div>
+                
+                <div class="tester-response" id="response-{{ endpoint.id }}">
+                    <div class="response-status" id="status-{{ endpoint.id }}"></div>
+                    <div class="response-body" id="body-{{ endpoint.id }}"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endfor %}
@@ -421,5 +612,126 @@ Content-Type: application/json</div>
             }
         });
     });
+    
+    // ===== FUNCIONES PARA PROBADOR DE ENDPOINTS =====
+    
+    // Mapeo de endpoints a sus URLs
+    const endpointUrls = {
+        1: '/api/auth/login',
+        2: '/api/usuarios',
+        '2.1': '/api/usuarios/perfil',
+        '2.2': '/api/usuarios/{id}',
+        '2.3': '/api/usuarios/{id}',
+        '2.4': '/api/usuarios/{id}',
+        3: '/api/home',
+        4: '/api/general',
+        5: '/api/privado',
+        6: '/api/mensaje',
+        7: '/api/privado/salir',
+        8: '/api/privado/cambio-chat',
+        9: '/api/invitar',
+        10: '/api/perfil',
+        11: '/api/actualizar',
+        12: '/api/logout',
+        13: '/api/admin/usuarios',
+        14: '/api/admin/usuarios/{id}/bloqueos',
+        15: '/api/admin/usuarios/{id}/bloquear',
+        16: '/api/admin/usuarios/{id}/desbloquear/{bloqueado_id}',
+        17: '/api/admin/chats',
+        18: '/api/admin/chats/{id}/miembros',
+        19: '/api/admin/chats/{id}/miembros/{usuario_id}',
+        20: '/api/admin/chats/{id}',
+    };
+    
+    async function testEndpoint(endpointId, method, name) {
+        const url = endpointUrls[endpointId];
+        const bodyInput = document.querySelector('.body-input-' + endpointId);
+        const tokenInput = document.querySelector('.token-input-' + endpointId);
+        const responseDiv = document.getElementById('response-' + endpointId);
+        const statusDiv = document.getElementById('status-' + endpointId);
+        const bodyDiv = document.getElementById('body-' + endpointId);
+        
+        if (!url) {
+            statusDiv.textContent = '❌ Error: URL no configurada para este endpoint';
+            statusDiv.className = 'response-status error';
+            responseDiv.classList.add('show');
+            return;
+        }
+        
+        const button = event.target;
+        button.disabled = true;
+        button.innerHTML = '<span class="loading-spinner"></span>Enviando...';
+        
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Agregar token si está disponible
+            if (tokenInput && tokenInput.value.trim()) {
+                const token = tokenInput.value.trim();
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            
+            const options = {
+                method: method.split('/')[0] || 'GET',
+                headers: headers
+            };
+            
+            // Agregar body si existe y si no es GET
+            if (bodyInput && bodyInput.value.trim() && options.method !== 'GET') {
+                try {
+                    const body = JSON.parse(bodyInput.value);
+                    options.body = JSON.stringify(body);
+                } catch (e) {
+                    throw new Error('JSON inválido en el body: ' + e.message);
+                }
+            }
+            
+            console.log('Haciendo request:', {
+                url: url,
+                ...options
+            });
+            
+            const response = await fetch(url, options);
+            
+            let data;
+            try {
+                const text = await response.text();
+                data = text ? JSON.parse(text) : { success: false, message: 'Respuesta vacía' };
+            } catch (e) {
+                data = { success: false, message: 'Error parsando JSON', text: text };
+            }
+            
+            // Mostrar respuesta
+            const statusCode = response.status;
+            const isSuccess = response.ok;
+            
+            statusDiv.innerHTML = `<strong>${isSuccess ? '✅' : '❌'} Status: ${statusCode}</strong> - ${name}`;
+            statusDiv.className = 'response-status ' + (isSuccess ? 'success' : 'error');
+            bodyDiv.textContent = JSON.stringify(data, null, 2);
+            responseDiv.classList.add('show');
+            
+        } catch (error) {
+            console.error('Error:', error);
+            statusDiv.innerHTML = `❌ <strong>Error de conexión:</strong> ${error.message}`;
+            statusDiv.className = 'response-status error';
+            bodyDiv.textContent = 'Revisa la consola del navegador (F12) para más detalles.';
+            responseDiv.classList.add('show');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = '▶ Enviar Solicitud';
+        }
+    }
+    
+    function clearTester(endpointId) {
+        const bodyInput = document.querySelector('.body-input-' + endpointId);
+        const tokenInput = document.querySelector('.token-input-' + endpointId);
+        const responseDiv = document.getElementById('response-' + endpointId);
+        
+        if (bodyInput) bodyInput.value = '';
+        if (tokenInput) tokenInput.value = '';
+        responseDiv.classList.remove('show');
+    }
 </script>
 {% endblock %}
