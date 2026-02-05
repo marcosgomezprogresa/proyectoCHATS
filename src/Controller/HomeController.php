@@ -329,8 +329,8 @@ Sin datos en el cuerpo de la solicitud',
   "message": "Chat activo cambiado",
   "data": {
     "chat_token": "chat_1",
-    "accion_realizada": "activado",
-    "timestamp": "2026-02-05T17:21:05Z"
+    "accion_realizada": "activar",
+    "timestamp": "2026-02-05T17:40:10Z"
   }
 }',
             ],
