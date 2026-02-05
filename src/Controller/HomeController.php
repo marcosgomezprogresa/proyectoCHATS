@@ -168,12 +168,8 @@ Sin datos en el cuerpo de la solicitud',
                 'descripcion' => 'Elimina/desactiva una cuenta de usuario. Solo el propietario puede eliminar su cuenta.',
                 'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
-  "success": true,
-  "message": "Usuario eliminado exitosamente",
-  "data": {
-    "usuario_id": 1,
-    "email": "juan@email.com"
-  }
+  "success": false,
+  "message": "Error al eliminar usuario: An exception occurred while executing a query: SQLSTATE[23000]: Integrity constraint violation: 1451 Cannot delete or update a parent row: a foreign key constraint fails"
 }',
             ],
             [
