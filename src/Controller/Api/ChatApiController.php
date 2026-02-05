@@ -356,6 +356,8 @@ class ChatApiController extends AbstractController
             }
 
             // VALIDAR: Verificar si están dentro del radio de 5km
+            // TEMPORALMENTE DESACTIVADO PARA TESTING
+            /*
             if (!$geoService->isWithinRadius($user, $userDestino, 5.0)) {
                 $distancia = $geoService->getDistanceBetweenUsers($user, $userDestino) ?? 999;
                 return $this->json([
@@ -370,6 +372,7 @@ class ChatApiController extends AbstractController
                     ]
                 ], 400);
             }
+            */
 
             // TODO: Verificar bloqueos (USER_BLOCKED)
             
