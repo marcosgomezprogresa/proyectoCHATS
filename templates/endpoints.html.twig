@@ -523,6 +523,20 @@
             <p>{{ endpoint.descripcion }}</p>
         </div>
         
+        {% if endpoint.params is defined and endpoint.params %}
+        <div class="detail-section">
+            <h3>Parámetros</h3>
+            {% if endpoint.url_completa_ejemplo is defined %}
+            <p><strong>URL Completa (Ejemplo):</strong></p>
+            <div class="code-block">{{ endpoint.url_completa_ejemplo }}</div>
+            {% endif %}
+            {% if endpoint.parametros_ejemplo is defined %}
+            <p><strong>Parámetros:</strong></p>
+            <div class="code-block">{{ endpoint.parametros_ejemplo }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
         <div class="detail-section">
             <h3>Ejemplo de Solicitud (Request)</h3>
             <div class="code-block">{{ endpoint.request }}</div>

@@ -112,19 +112,21 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => false,
                 'params' => ['id'],
                 'ruta' => 'GET /api/usuarios/{id}',
+                'url_completa_ejemplo' => 'GET /api/usuarios/9',
+                'parametros_ejemplo' => 'id = 9 (ID del usuario a consultar)',
                 'acceso' => 'Token',
-                'descripcion' => 'Obtiene el perfil público de un usuario específico.',
+                'descripcion' => 'Obtiene el perfil público de un usuario específico. Ingresa el ID del usuario en la URL.',
                 'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
   "success": true,
   "message": "Perfil obtenido exitosamente",
   "data": {
-    "usuario_id": 5,
-    "email": "carlos@email.com",
-    "nombre": "Carlos",
-    "estado": "online",
-    "avatar_url": "https://...",
-    "ultima_actividad": "2024-01-16T10:58:00Z"
+    "usuario_id": 9,
+    "email": "miusuario@ejemplo.com",
+    "nombre": "Mi Usuario",
+    "estado": "offline",
+    "avatar_url": null,
+    "ultima_actividad": null
   }
 }',
             ],
