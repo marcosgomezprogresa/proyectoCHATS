@@ -551,10 +551,10 @@ Sin datos en el cuerpo de la solicitud',
   "success": true,
   "message": "Usuario bloqueado exitosamente",
   "data": {
-    "bloqueador_id": 9,
-    "bloqueado_id": 10,
-    "bloqueado_nombre": "ususario2",
-    "fecha_bloqueo": "2026-02-05T18:30:00Z"
+    "bloqueador_id": 11,
+    "bloqueado_id": 9,
+    "bloqueado_nombre": "Nuevo Nombre",
+    "fecha_bloqueo": "2026-02-05T19:07:03Z"
   }
 }',
             ],
