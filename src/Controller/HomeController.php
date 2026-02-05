@@ -211,22 +211,11 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => false,
                 'ruta' => 'GET /api/general?page=1&limit=20',
                 'acceso' => 'Token',
-                'descripcion' => 'Obtiene el historial del chat general con paginación.',
+                'descripcion' => 'Obtiene el historial del chat general con paginación. Nota: El chat general debe ser creado previamente por un administrador.',
                 'request' => 'Sin parámetros (opcionalmente: ?page=1&limit=20)',
                 'response' => '{
-  "success": true,
-  "data": {
-    "chat_token": "chat_general",
-    "nombre": "General",
-    "tipo": "general",
-    "mensajes": [],
-    "paginacion": {
-      "total_mensajes": 0,
-      "pagina_actual": 1,
-      "mensajes_por_pagina": 20,
-      "tiene_mas": false
-    }
-  }
+  "success": false,
+  "message": "Chat general no disponible"
 }',
             ],
             [
@@ -236,21 +225,13 @@ Sin datos en el cuerpo de la solicitud',
                 'necesita_body' => true,
                 'ruta' => 'POST /api/general',
                 'acceso' => 'Token',
-                'descripcion' => 'Envía un nuevo mensaje al chat general.',
+                'descripcion' => 'Envía un nuevo mensaje al chat general. Nota: El chat general debe ser creado previamente.',
                 'request' => '{
   "contenido": "Hola a todos en el chat general"
 }',
                 'response' => '{
-  "success": true,
-  "data": {
-    "mensaje_token": "msg_1",
-    "chat_token": "chat_general",
-    "nombre_usuario": "Juaaaaaan Pérez",
-    "mensaje": "Hola a todos en el chat general",
-    "fecha_hora": "2026-02-05T14:30:00Z",
-    "tipo": "texto",
-    "estado": "entregado"
-  }
+  "success": false,
+  "message": "Chat general no disponible"
 }',
             ],
             [
