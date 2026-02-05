@@ -617,7 +617,7 @@ Content-Type: application/json</div>
     
     // Mapeo de endpoints a sus URLs
     const endpointUrls = {
-        1: '/api/auth/login',
+        1: '/api/login',
         2: '/api/usuarios',
         '2.1': '/api/usuarios/perfil',
         '2.2': '/api/usuarios/{id}',
@@ -696,11 +696,12 @@ Content-Type: application/json</div>
             const response = await fetch(url, options);
             
             let data;
+            let responseText = '';
             try {
-                const text = await response.text();
-                data = text ? JSON.parse(text) : { success: false, message: 'Respuesta vacía' };
+                responseText = await response.text();
+                data = responseText ? JSON.parse(responseText) : { success: false, message: 'Respuesta vacía' };
             } catch (e) {
-                data = { success: false, message: 'Error parsando JSON', text: text };
+                data = { success: false, message: 'Error parsando JSON: ' + e.message, response_text: responseText.substring(0, 200) };
             }
             
             // Mostrar respuesta
