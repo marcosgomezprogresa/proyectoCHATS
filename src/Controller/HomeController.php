@@ -632,16 +632,11 @@ Sin datos en el cuerpo de la solicitud',
                 'params' => ['id', 'usuario_id'],
                 'ruta' => 'DELETE /api/admin/chats/{id}/miembros/{usuario_id}',
                 'acceso' => 'Token (admin del chat)',
-                'descripcion' => 'Expulsa a un usuario de un chat específico.',
+                'descripcion' => 'Expulsa a un usuario de un chat específico. Solo el admin del chat puede hacerlo.',
                 'request' => 'Sin datos en el cuerpo de la solicitud',
                 'response' => '{
-  "success": true,
-  "message": "Usuario expulsado del chat",
-  "data": {
-    "chat_id": 1,
-    "usuario_id": 10,
-    "usuario_nombre": "ususario2"
-  }
+  "success": false,
+  "message": "No tienes permisos para expulsar miembros"
 }',
             ],
             [
